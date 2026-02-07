@@ -1,0 +1,253 @@
+# =============================================================================
+#   ███╗   ██╗██╗████████╗██████╗  ██████╗     ██████╗     ██╗
+#   ████╗  ██║██║╚══██╔══╝██╔══██╗██╔═══██╗    ██╔══██╗   ██╔╝
+#   ██╔██╗ ██║██║   ██║   ██████╔╝██║   ██║    ██████╔╝  ██╔╝ 
+#   ██║╚██╗██║██║   ██║   ██╔══██╗██║   ██║    ██╔══██╗ ██╔╝  
+#   ██║ ╚████║██║   ██║   ██║  ██║╚██████╔╝    ██║  ██║██╔╝   
+#   ╚═╝  ╚═══╝╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝     ╚═╝  ╚═╝╚═╝    
+#                         MAIN CONFIGURATION FILE
+# =============================================================================
+# Need help? Create a ticket at: https://discord.gg/38Ebj42e
+# Documentation: https://jan1k1.github.io/BoosterRewards
+# =============================================================================
+
+# =============================================================================
+# AVAILABLE PLACEHOLDERS
+# =============================================================================
+# You can use these placeholders in reward commands and messages:
+#
+#   %player%         - The Minecraft username of the player
+#   %uuid%           - The player's Minecraft UUID
+#   %discord_user%   - The player's Discord username (e.g., "jan1k")
+#   %discord_id%     - The player's Discord User ID (e.g., "123456789012345678")
+#   %boost_start%    - Timestamp when the player started boosting
+#   %boost_duration% - How long the player has been boosting (e.g., "3 days")
+#
+# =============================================================================
+
+# =============================================================================
+# LINKING CONFIGURATION
+# =============================================================================
+linking:
+  # Linking Mode:
+  #   MINECRAFT_TO_DISCORD: Run /link in-game -> Get code -> Run /link <code> in Discord (Recommended)
+  #   DISCORD_TO_MINECRAFT: Run /link in Discord -> Get code -> Run /link <code> in-game
+  mode: MINECRAFT_TO_DISCORD
+
+# =============================================================================
+# DATABASE SETTINGS
+# =============================================================================
+# The plugin needs a database to store linked accounts and boost data.
+#
+# SUPPORTED TYPES:
+#   - H2       (Default, file-based, no setup required)
+#   - MYSQL    (Remote database, requires server details)
+#   - MARIADB  (Same as MySQL, just a different database engine)
+#
+# For small servers (under 100 players), H2 is perfectly fine.
+# For large networks, use MySQL/MariaDB for better performance.
+# =============================================================================
+database:
+  # Database type: H2, MYSQL, or MARIADB
+  type: H2
+  
+  # MySQL/MariaDB connection settings (ignored if using H2)
+  host: "localhost"
+  port: 3306
+  database: "boosterrewards"
+  username: "root"
+  password: ""
+  
+  # Advanced settings
+  table-prefix: "booster_"  # Prefix for database tables (useful if sharing a database)
+  pool-size: 10           # Max number of database connections (10 is good for most servers)
+  timeout: 5000           # Connection timeout in milliseconds
+
+# =============================================================================
+# REWARD SETTINGS
+# =============================================================================
+# Define what rewards players receive when they boost your Discord server.
+# You can create multiple reward tiers with different requirements.
+#
+# COMMAND PREFIXES:
+#   - No prefix or "console: " = Run as console (recommended for permissions)
+#   - "player: " = Run as the player
+#
+# EXAMPLES:
+#   - "lp user %player% parent add booster"     (Give LuckPerms group)
+#   - "give %player% diamond 5"                  (Give items)
+#   - "eco give %player% 1000"                   (Give money)
+#   - "player: warp boosterzone"                 (Teleport player)
+# =============================================================================
+rewards:
+  booster:
+    # Enable/disable this reward tier
+    enabled: true
+    
+    # Permission given to boosters (optional, for permission-based perks)
+    permission: "boosterrewards.booster"
+    
+    # Commands to run when player STARTS boosting
+    # These run once when boost is detected
+    on-boost:
+      - "lp user %player% parent add booster"
+      - "give %player% diamond 5"
+    
+    # Commands to run when player STOPS boosting
+    # These run when their boost expires or is removed
+    on-stop:
+      - "lp user %player% parent remove booster"
+    
+    # Cooldown before they can receive rewards again (in seconds, 0 = no cooldown)
+    cooldown: 0
+    
+    # If true, rewards can only be claimed once ever (even if they boost again)
+    one-time: false
+
+  # Example of a secondary reward tier (disabled by default)
+  # You can add as many tiers as you want
+  Booster-subscriber:
+    enabled: false
+    role-id: "000000000000000000"  # Specific Discord role to check for
+    permission: "boosterrewards.subscriber"
+    on-boost:
+      - "lp user %player% parent add subscriber"
+    on-stop:
+      - "lp user %player% parent remove subscriber"
+
+# =============================================================================
+# SYNC & VERIFICATION SETTINGS
+# =============================================================================
+# Controls how often the plugin checks Discord for boost status updates.
+# =============================================================================
+sync:
+  # How often to check all online players' boost status (in seconds)
+  # Lower = more accurate but more API calls
+  # Recommended: 300 (5 minutes) for most servers
+  interval: 300
+  
+  # Automatically remove rewards when a player stops boosting?
+  # If false, they keep rewards forever once obtained
+  remove-rewards-on-stop: true
+  
+  # Check boost status when a player joins the server?
+  # Useful for applying rewards immediately on login
+  check-on-join: true
+  
+  # Verify all boosters when the server starts?
+  # This syncs the database with current Discord boost status
+  verify-on-startup: true
+  
+  # How to handle multiple reward tiers
+  # AGGREGATE = Give all tiers they qualify for
+  # HIGHEST   = Only give the highest tier
+  rank-mode: AGGREGATE
+
+# =============================================================================
+# LINKING SETTINGS
+# =============================================================================
+# Controls how players link their Minecraft and Discord accounts.
+# =============================================================================
+linking:
+  # ===========================================
+  # LINKING MODE (How players start the link)
+  # ===========================================
+  # This controls which platform initiates the linking process.
+  #
+  # DISCORD_TO_MINECRAFT (Recommended):
+  #   1. Player runs /link in Discord
+  #   2. Bot gives them a code (e.g., "ABC123")
+  #   3. Player types /link ABC123 in Minecraft
+  #   ✅ Best for: Most servers, prevents abuse
+  #
+  # MINECRAFT_TO_DISCORD:
+  #   1. Player runs /link in Minecraft
+  #   2. Plugin gives them a code (e.g., "XYZ789")
+  #   3. Player types /link XYZ789 in Discord
+  #   ✅ Best for: Servers where players are in-game first
+  #
+  mode: DISCORD_TO_MINECRAFT
+  
+  # How long a link code is valid (in seconds)
+  # After this time, the code expires and they need a new one
+  # Default: 300 = 5 minutes
+  code-expiry: 300
+  
+  # Length of the link code
+  # 6 = codes like "ABC123" (recommended)
+  # 8 = codes like "ABCD1234" (more secure)
+  code-length: 6
+  
+  # Allow players to unlink and relink their account?
+  # true  = Players can use /logout and /link again
+  # false = Permanent link (contact staff to change)
+  allow-relink: false
+  
+  # Require the user to be a booster BEFORE they can link?
+  # true  = Only boosters can link (anti-spam)
+  # false = Anyone can link, but only boosters get rewards
+  require-boost-to-link: false
+
+# =============================================================================
+# FEATURES (Enable/Disable Plugin Features)
+# =============================================================================
+# Toggle various plugin features on or off.
+# =============================================================================
+features:
+  # ADMIN GUI
+  # Enables the /Booster command that opens a control panel for admins.
+  # From the GUI you can: reload configs, force-sync players, view stats.
+  # Set to false if you prefer command-only administration.
+  admin-gui: true
+  
+  # DEBUG MODE
+  # Prints detailed logs to console for troubleshooting issues.
+  # Shows: API calls, database queries, sync operations, etc.
+  # ⚠️ Only enable when diagnosing problems - very spammy!
+  debug-mode: false
+  
+  # UPDATE CHECKER
+  # Checks for new plugin versions when the server starts.
+  # If an update is available, it notifies admins in console.
+  # Does NOT auto-update - just informs you.
+  update-checker: true
+  
+  # METRICS (bStats)
+  # Sends anonymous usage statistics to bStats.org
+  # Helps us understand how the plugin is used to improve it.
+  # Data: Server version, player count, Java version (no IPs or names)
+  # Disable if you prefer complete privacy.
+  metrics: true
+  
+  # AUTO-CLAIM REWARDS
+  # Automatically give rewards when a boost is detected.
+  # true  = Rewards are given instantly when boost is detected
+  # false = Player must run a command to claim their rewards
+  auto-claim: true
+  
+  # ANNOUNCE BOOSTS
+  # Post a message in Discord when a linked player boosts.
+  # Uses the channel set in discord.yml > channels > boost-announcements
+  # Set to false for silent operation.
+  announce-boosts: true
+
+# =============================================================================
+# LINK PANEL (Optional Discord Embed)
+# =============================================================================
+# Creates a permanent embed in a Discord channel with a "Link Account" button.
+# Players click the button instead of using /link in Discord.
+# =============================================================================
+panel:
+  # Enable the link panel feature
+  enabled: false
+  
+  # Channel ID where the panel will be posted
+  # (See discord.yml for how to get Channel IDs)
+  channel-id: "000000000000000000"
+  
+  # Automatically update the panel embed periodically
+  auto-update: true
+  
+  # How often to update the panel (in seconds)
+  update-interval: 60
+

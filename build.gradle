@@ -1,0 +1,81 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+group = 'studio.jan1k'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url = 'https://jitpack.io' }
+    maven { url = 'https://m2.dv8tion.net/releases' }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT'
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
+    
+    // Core Dependencies
+    implementation('net.dv8tion:JDA:6.3.0') {
+        exclude module: 'opus-java'
+    }
+    implementation 'com.zaxxer:HikariCP:7.0.2'
+    implementation 'com.h2database:h2:2.4.240'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.slf4j:slf4j-simple:2.0.17'
+    
+    // Jackson (Stable 2026 Compatible)
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
+}
+
+tasks.named('shadowJar', ShadowJar) {
+    archiveBaseName.set('BoosterRewards')
+    archiveClassifier.set('Fat') // Keep original classifier
+    mergeServiceFiles()
+    relocate 'net.dv8tion', 'studio.jan1k.boosterrewards.libs.jda'
+    relocate 'com.zaxxer', 'studio.jan1k.boosterrewards.libs.hikari'
+    relocate 'com.h2database', 'studio.jan1k.boosterrewards.libs.h2'
+    relocate 'org.slf4j', 'studio.jan1k.boosterrewards.libs.slf4j'
+    relocate 'com.fasterxml.jackson', 'studio.jan1k.boosterrewards.libs.jackson'
+}
+
+task liteJar(type: ShadowJar) {
+    archiveBaseName.set('BoosterRewards')
+    archiveClassifier.set('Lite')
+    from sourceSets.main.output
+    
+    dependencies {
+        exclude(dependency('.*:.*'))
+    }
+}
+
+tasks.build {
+    dependsOn shadowJar, liteJar
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+processResources {
+    def props = [version: project.version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+}
+

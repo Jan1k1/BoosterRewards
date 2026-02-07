@@ -1,0 +1,42 @@
+name: BoosterRewards
+version: ${version}
+main: studio.jan1k.boosterrewards.BoosterReward
+api-version: '1.21'
+prefix: BoosterRewards
+authors: [jan1k]
+description: Discord Boosting Reward System
+
+commands:
+  link:
+    description: Link your account to Discord
+    usage: /link [code]
+  unlink:
+    description: Unlink your Discord account
+    aliases: [logout]
+  claim:
+    description: Claim your booster rewards
+  setboosterreward:
+    description: Configure booster rewards (Admin)
+    permission: boosterrewards.admin
+    aliases: [rewardsadmin]
+  boosterrewards:
+    description: Main plugin command
+    aliases: [brp, br]
+    usage: /boosterrewards [reload|help|link|unlink|claim|admin]
+
+permissions:
+  boosterrewards.admin:
+    description: Allows use of admin commands
+    default: op
+
+# Native Library Support (Handles the heaviest dependencies)
+libraries:
+  - net.dv8tion:JDA:6.3.0
+  - com.zaxxer:HikariCP:7.0.2
+  - com.h2database:h2:2.4.240
+  - org.slf4j:slf4j-api:2.0.17
+  - org.slf4j:slf4j-simple:2.0.17
+  - com.fasterxml.jackson.core:jackson-databind:2.18.2
+  - com.fasterxml.jackson.core:jackson-core:2.18.2
+  - com.fasterxml.jackson.core:jackson-annotations:2.18.2
+

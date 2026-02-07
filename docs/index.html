@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NitroRewards+ | Discord Booster Rewards for Minecraft</title>
+    <meta name="description"
+        content="Reward Discord server boosters with automatic in-game perks. Link Minecraft accounts, sync boost status, grant custom rewards when players boost your server.">
+    <meta name="keywords"
+        content="minecraft discord plugin, discord booster rewards, minecraft server boosters, discord integration, minecraft perks, server boost rewards">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">NitroRewards<span class="plus">+</span></div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#setup">Setup</a>
+                <a href="#docs">Docs</a>
+                <a href="https://github.com/jan1k1/nitrorewardsplus" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Reward Discord Boosters<br>Automatically</h1>
+            <p>Link Minecraft accounts to Discord. Give perks when players boost your server. Remove them when they
+                stop.</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/jan1k1/nitrorewardsplus/releases" class="btn-primary">Download</a>
+                <a href="#setup" class="btn-secondary">Quick Start</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="terminal-body">
+                    <p><span class="prompt">[INFO]</span> NitroRewards+ v1.0.0 initialized</p>
+                    <p><span class="prompt">[INFO]</span> Connected to Discord guild</p>
+                    <p><span class="success">✓</span> Player jan1k linked to Discord</p>
+                    <p><span class="success">✓</span> Boost detected - rewards granted</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <h2>Built for Scale</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Zero Lag</h3>
+                <p>All database and Discord API calls run async. In-memory caching prevents database spam. Tested on
+                    1000+ player servers.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3>Flexible Linking</h3>
+                <p>Choose Discord-to-Minecraft or Minecraft-to-Discord linking flow. 6-digit codes expire after 5
+                    minutes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h3>Custom Commands</h3>
+                <p>Run any command when players boost or stop boosting. Give permissions, items, currency, or teleport
+                    them.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3>H2 or MySQL</h3>
+                <p>Embedded H2 database for small servers. MySQL/MariaDB for networks. HikariCP connection pooling
+                    included.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="setup" class="setup">
+        <h2>Setup in 5 Minutes</h2>
+        <div class="setup-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Create Discord Bot</h3>
+                    <p>Go to <a href="https://discord.com/developers/applications"
+                            target="_blank">discord.com/developers</a> → New Application → Bot tab → Copy token</p>
+                    <p class="note">Enable "Server Members Intent" under Privileged Gateway Intents</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Install Plugin</h3>
+                    <p>Download JAR → place in <code>plugins/</code> → start server → stop server</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Configure</h3>
+                    <p>Edit <code>discord.yml</code> - add bot token and server ID</p>
+                    <p>Edit <code>config.yml</code> - set up rewards</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Start Server</h3>
+                    <p>Bot will connect to Discord. Players can now use <code>/link</code></p>
+                </div>
+            </div>
+        </div>
+        <div class="config-example">
+            <h3>Reward Example</h3>
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      - "lp user %player% parent add booster"
+      - "give %player% diamond 5"
+    on-stop:
+      - "lp user %player% parent remove booster"</code></pre>
+        </div>
+    </section>
+
+    <section id="docs" class="docs">
+        <h2>Documentation</h2>
+        <div class="docs-grid">
+            <a href="configuration.html" class="doc-card">
+                <h3>Configuration Guide</h3>
+                <p>All config options explained with examples</p>
+            </a>
+            <a href="commands.html" class="doc-card">
+                <h3>Commands & Permissions</h3>
+                <p>In-game and Discord commands reference</p>
+            </a>
+            <a href="placeholders.html" class="doc-card">
+                <h3>Placeholders</h3>
+                <p>Available variables for reward commands</p>
+            </a>
+            <a href="troubleshooting.html" class="doc-card">
+                <h3>Troubleshooting</h3>
+                <p>Common issues and solutions</p>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>NitroRewards+</h4>
+                <p>Open source Minecraft plugin</p>
+                <p>MIT License</p>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <a href="https://github.com/jan1k1/nitrorewardsplus">GitHub</a>
+                <a href="https://github.com/jan1k1/nitrorewardsplus/issues">Issues</a>
+                <a href="https://discord.gg/38Ebj42e">Discord Support</a>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <a href="#docs">Documentation</a>
+                <a href="https://github.com/jan1k1/nitrorewardsplus/releases">Download</a>
+                <a href="CONTRIBUTING.md">Contributing</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
