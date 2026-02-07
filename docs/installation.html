@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Installation - BoosterRewards Wiki</title>
     <link rel="stylesheet" href="wiki.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 </head>
 
 <body>
@@ -145,21 +146,39 @@
             </ol>
 
             <p>The plugin creates:</p>
-            <pre><code>plugins/BoosterRewards/
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">File Structure</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>plugins/BoosterRewards/
 ├── config.yml
 ├── discord.yml
 ├── messages.yml
 └── database/
     └── boosterrewards.db</code></pre>
+            </div>
 
             <h2><span class="step-number">3</span> Configure Discord Bot</h2>
 
             <p>Edit <code>plugins/BoosterRewards/discord.yml</code>:</p>
 
             <h3>3.1 Add Bot Token</h3>
-            <pre><code>bot:
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">discord.yml</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">bot:
   token: "YOUR_BOT_TOKEN_HERE"
   guild-id: "000000000000000000"</code></pre>
+            </div>
 
             <p>Replace <code>YOUR_BOT_TOKEN_HERE</code> with token from Step 1.2</p>
 
@@ -177,7 +196,15 @@
 
             <p>Edit <code>plugins/BoosterRewards/config.yml</code>:</p>
 
-            <pre><code>rewards:
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">config.yml</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">rewards:
   booster:
     enabled: true
     on-boost:
@@ -185,6 +212,7 @@
       - "give %player% diamond 5"
     on-stop:
       - "lp user %player% parent remove booster"</code></pre>
+            </div>
 
             <p>This example:</p>
             <ul>
@@ -202,10 +230,19 @@
                 <li>Check console for:</li>
             </ol>
 
-            <pre><code>[BoosterRewards] Enabling BoosterRewards v0.0.1
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">Console Output</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>[BoosterRewards] Enabling BoosterRewards v0.0.1
 [BoosterRewards] Connected to Discord guild: YourServerName
 [BoosterRewards] Database initialized successfully
 [BoosterRewards] Registered 3 Discord commands</code></pre>
+            </div>
 
             <div class="success-box">
                 <strong>✅ Success!</strong> If you see these messages, installation is complete.
@@ -223,7 +260,16 @@
 
             <h3>Test In-Game</h3>
             <p>Join your server and run:</p>
-            <pre><code>/boosterrewards</code></pre>
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">Minecraft Command</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-mcfunction">/boosterrewards</code></pre>
+            </div>
 
             <p>You should see the plugin help menu.</p>
 
@@ -248,6 +294,20 @@
             </div>
         </main>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script>
+        function copyCode(btn) {
+            const pre = btn.closest('.code-window').querySelector('pre');
+            const code = pre.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = originalText, 2000);
+            });
+        }
+    </script>
 </body>
 
 </html>
