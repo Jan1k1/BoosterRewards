@@ -11,11 +11,13 @@
 <body>
     <div class="wiki-header">
         <div class="header-content">
-            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <h1>BoosterRewards Wiki</h1>
             <nav class="header-nav">
                 <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
                 <a href="https://discord.gg/38Ebj42e">Discord</a>
                 <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+                <a href="https://github.com/jan1k1.png" style="padding: 0;"><img src="https://github.com/jan1k1.png"
+                        style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;"></a>
             </nav>
         </div>
     </div>
@@ -74,34 +76,125 @@
             <p>Customize all in-game messages sent to players. Supports legacy color codes (<code>&a</code>) and Hex
                 colors (<code>&#RRGGBB</code>).</p>
 
-            <h2>General Settings</h2>
-            <pre><code># Prefix shown before most plugin messages
-prefix: "&#fb00ff&lN&#fc45ff&li&#fd6aff&lt&#fe86ff&lr&#ff9fff&lo &#888888» &7"
+            <pre><code># =============================================================================
+# BOOSTER REWARDS - Messages Configuration
+# =============================================================================
+# Placeholders: %player%, %discord_user%, %discord_id%, %code%, %boost_duration%
+# Color codes: Use & for colors, &#RRGGBB for hex colors
+# =============================================================================
 
-# Error messages
-no-permission: "&cYou don't have permission to do that."
-player-only: "&cThis command can only be executed by players."
-invalid-args: "&cInvalid usage! Use: &f%usage%"</code></pre>
+prefix: "&#E354FF&lɴɪᴛʀᴏ &#54A5FF&lʀᴇᴡᴀʀᴅs &8» &7"
 
-            <h2>Linking Messages</h2>
-            <pre><code>linking:
-  code-generated: "&aRun &n/link %code%&a in Discord to finish!"
-  code-expired: "&cYour linking code has expired."
-  success: "&aSuccessfully linked your account to &f%discord_user%&a!"
-  already-linked: "&cYou are already linked to a Discord account."
-  not-linked: "&cYou must link your account first! Use /link."
-  unlinked: "&aSuccessfully unlinked your account."</code></pre>
+# =============================================================================
+# IN-GAME MESSAGES
+# =============================================================================
+in-game:
+  no-permission: "&cYou do not have permission to use this command."
+  
+  link:
+    usage: "&cUsage: /link <code>"
+    success: "&aSuccessfully linked with Discord user &f%discord_user%&a!"
+    invalid-code: "&cInvalid or expired link code."
+    already-linked: "&cYou are already linked! Use /logout to unlink."
+    not-allowed-relink: "&cYou cannot relink your account. Contact staff for help."
+    
+  logout:
+    success: "&aSuccessfully unlinked your account. All booster perks have been revoked."
+    not-linked: "&cYou are not linked to any Discord account."
+    
+  rewards:
+    received: "&aYou received your booster rewards!"
+    revoked: "&cYour booster rewards have been revoked."
+    already-claimed: "&eYou have already claimed your rewards."
+    on-cooldown: "&cYou must wait &f%time%&c before claiming again."
+    
+  boost:
+    started: "&a%player% started boosting! Rewards granted."
+    stopped: "&c%player% stopped boosting. Rewards revoked."
+    
+  admin:
+    reload-success: "&aConfiguration reloaded successfully!"
+    force-sync: "&aSyncing all linked players..."
+    force-sync-complete: "&aSync complete! Checked &f%count%&a players."
 
-            <h2>Reward Messages</h2>
-            <pre><code>rewards:
-  received: "&aYou received the &f%tier%&a reward!"
-  expired: "&cYour booster reward has expired."
-  claimed: "&aYou have claimed your pending rewards!"
-  none-pending: "&cYou don't have any pending rewards."</code></pre>
+# =============================================================================
+# DISCORD MESSAGES
+# =============================================================================
+discord:
+  link:
+    command-description: "Link your Minecraft account to Discord"
+    success-title: "🔗 Account Linked!"
+    success-description: "Your linking code is: **%code%**\n\nType `/link %code%` in Minecraft to complete the process.\n\n⏰ This code expires in 5 minutes."
+    already-linked-title: "⚠️ Already Linked"
+    already-linked-description: "You are already linked to Minecraft account: **%player%**"
+    
+  unlink:
+    command-description: "Unlink your Minecraft account"
+    success-title: "🔓 Account Unlinked"
+    success-description: "Your Minecraft account has been unlinked."
+    not-linked-title: "⚠️ Not Linked"
+    not-linked-description: "You are not linked to any Minecraft account."
+    
+  status:
+    command-description: "Check your boost status"
+    title: "📊 Boost Status"
+    linked-description: "**Minecraft:** %player%\n**Boosting:** %boosting%\n**Since:** %boost_start%"
+    not-linked-description: "You are not linked to any Minecraft account."
+    
+  boost:
+    not-booster-title: "❌ Not a Booster"
+    not-booster-description: "You must be a Server Booster to claim rewards!"
+    
+  announcements:
+    new-boost-title: "🚀 New Booster!"
+    new-boost-description: "**%discord_user%** just boosted the server!\nThey are linked to: **%player%**"
+    boost-ended-title: "💔 Boost Ended"
+    boost-ended-description: "**%discord_user%** is no longer boosting."
 
-            <div class="info-box">
-                <strong>Tip:</strong> Set any message to <code>""</code> (empty string) to disable it completely.
-            </div>
+# =============================================================================
+# EMBED SETTINGS (Customizable)
+# =============================================================================
+embeds:
+  default:
+    color: "#54A5FF"
+    footer-text: "boosterrewards • jan1k.studio"
+    footer-icon: ""
+    thumbnail: ""
+    
+  success:
+    color: "#00FF00"
+    
+  error:
+    color: "#FF0000"
+    
+  warning:
+    color: "#FFAA00"
+
+# =============================================================================
+# PANEL EMBED (If panel.enabled in config.yml)
+# =============================================================================
+panel:
+  embed:
+    title: "🎮 Link Your Minecraft Account"
+    description: "Click the button below to link your Minecraft account and claim your booster rewards!\n\n**Requirements:**\n• Must be a Server Booster\n• Minecraft account not already linked"
+    color: "#E354FF"
+    thumbnail: ""
+    image: ""
+    footer-text: "boosterrewards"
+  button:
+    label: "🔗 Link Account"
+    style: "PRIMARY"
+
+# =============================================================================
+# GUI SETTINGS
+# =============================================================================
+gui:
+  admin-panel:
+    title: "&8boosterrewards Control Panel"
+    fill-item: "GRAY_STAINED_GLASS_PANE"
+  player-status:
+    title: "&8Your Boost Status"
+    fill-item: "BLACK_STAINED_GLASS_PANE"</code></pre>
 
             <div class="footer-nav">
                 <a href="discord.html" class="prev-page">← Previous: discord.yml</a>

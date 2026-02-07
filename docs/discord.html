@@ -11,11 +11,13 @@
 <body>
     <div class="wiki-header">
         <div class="header-content">
-            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <h1>BoosterRewards Wiki</h1>
             <nav class="header-nav">
                 <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
                 <a href="https://discord.gg/38Ebj42e">Discord</a>
                 <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+                <a href="https://github.com/jan1k1.png" style="padding: 0;"><img src="https://github.com/jan1k1.png"
+                        style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;"></a>
             </nav>
         </div>
     </div>
@@ -73,53 +75,125 @@
 
             <p>The <code>discord.yml</code> file contains sensitive information for connecting to your Discord bot.</p>
 
-            <div class="warning-box">
-                <strong>Security Warning:</strong> Never share your <code>discord.yml</code> file or your bot token. Any
-                user with your token can control your bot.
-            </div>
+            <pre><code># =============================================================================
+#    ____                   _            _____ZX______
+#   |  _ \                 | |          |  __ \ZX_____\
+#   | |_) | ___   ___  ___ | |_ ___ _ __| |__) |_____
+#   |  _ < / _ \ / _ \/ __|| __/ _ \ '__|  _  // _ \ \ /\ / / _` | '__/ _` |/ __|
+#   | |_) | (_) | (_) \__ \| ||  __/ |  | | \ \  __/\ V  V / (_| | | | (_| \__ \
+#   |____/ \___/ \___/|___/ \__\___|_|  |_|  \_\___| \_/\_/ \__,_|_|  \__,_|___/
+#                       DISCORD CONFIGURATION FILE
+# =============================================================================
+# Need help? Create a ticket at: https://discord.gg/38Ebj42e
+# =============================================================================
 
-            <h2>Bot Credentails</h2>
-            <pre><code>bot:
-  # Your Discord Bot Token
-  token: "OTk5..."
-  
-  # Your Discord Server ID (Right click server -> Copy ID)
-  guild-id: "123456789012345678"
-  
-  # Activity to show on the bot
-  activity: "Watching Server Boosters"
-  
-  # Status: ONLINE, IDLE, DND, INVISIBLE
-  status: ONLINE</code></pre>
+# =============================================================================
+# HOW TO ENABLE DEVELOPER MODE (Required to copy IDs)
+# =============================================================================
+# Developer Mode lets you right-click things in Discord to copy their IDs.
+#
+#   1. Open Discord and go to User Settings (gear icon, bottom left)
+#   2. Scroll down to "App Settings" and click "Advanced"
+#   3. Toggle ON "Developer Mode"
+#
+# Now you can right-click users, channels, roles, and servers to copy their ID!
+# =============================================================================
 
-            <h2>Channel Settings</h2>
-            <pre><code>channels:
-  # Channel to send boost logs/announcements
-  logs: "123456789012345678"
-  
-  # Channel to send database errors (admin only)
-  errors: "123456789012345678"</code></pre>
+# =============================================================================
+# HOW TO CREATE A DISCORD BOT
+# =============================================================================
+# 1. Go to https://discord.com/developers/applications
+# 2. Click the blue "New Application" button in the top right
+# 3. Give your bot a name (e.g., "boosterrewards Bot") and click "Create"
+# 4. Go to the "Bot" tab on the left sidebar
+# 5. Click "Reset Token" and then "Copy" to get your bot token
+#    ⚠️ NEVER share this token with anyone! It's like a password.
+# 6. Scroll down to "Privileged Gateway Intents" and enable:
+#    ✅ SERVER MEMBERS INTENT (required to check boost status)
+# 7. Go to "OAuth2" > "URL Generator" on the left sidebar
+# 8. Under "Scopes", check: bot, applications.commands
+# 9. Under "Bot Permissions", check: Send Messages, Manage Roles, Embed Links
+# 10. Copy the generated URL at the bottom and open it in your browser
+# 11. Select your server and click "Authorize"
+# 
+# Your bot is now in your server! Paste the token below.
+# =============================================================================
 
-            <h2>Role Settings</h2>
-            <pre><code>roles:
-  # Role ID given to linked players (optional)
-  linked: "123456789012345678"
+# =============================================================================
+# BOT CREDENTIALS (REQUIRED)
+# =============================================================================
+bot:
+  # Your Discord Bot Token (from step 5 above)
+  # Example: "MTIzNDU2Nzg5MDEyMzQ1Njc4.Gh1234.abcdefghijklmnopqrstuvwxyz1234567890"
+  token: "YOUR_BOT_TOKEN_HERE"
   
-  # Role ID for boosters (used to verify status)
-  booster: "123456789012345678"</code></pre>
+  # Your Discord Server (Guild) ID
+  # HOW TO GET: Right-click your server icon > "Copy Server ID"
+  # Example: "123456789012345678"
+  guild-id: "000000000000000000"
 
-            <h2>Messages</h2>
-            <p>Customize the embeds sent by the Discord bot.</p>
-            <pre><code>messages:
-  embed-color: "#ff73fa"
+# =============================================================================
+# ROLE IDS (OPTIONAL)
+# =============================================================================
+# These are EXTRA roles you can assign to users. The plugin detects boosters
+# automatically - you don't need to set a booster role here.
+#
+# HOW TO GET ROLE ID:
+#   1. Go to Server Settings > Roles
+#   2. Right-click the role you want
+#   3. Click "Copy Role ID"
+#
+# Set to "000000000000000000" or leave as-is to disable.
+# =============================================================================
+roles:
+  # Role to give when a user links their Minecraft account
+  # Useful for tracking who has linked their account
+  linked-role-id: "000000000000000000"
   
-  link-success:
-    title: "✅ Account Linked"
-    description: "Successfully linked to **%player%**!"
+  # Additional role to give to boosters (on top of their rewards)
+  # This is OPTIONAL - booster detection works without it
+  custom-booster-role-id: "000000000000000000"
+
+# =============================================================================
+# CHANNEL IDS (OPTIONAL)
+# =============================================================================
+# Channels for logging and announcements.
+#
+# HOW TO GET CHANNEL ID:
+#   1. Right-click the text channel
+#   2. Click "Copy Channel ID"
+#
+# Set to "000000000000000000" or leave as-is to disable.
+# =============================================================================
+channels:
+  # Channel where boost announcements are sent
+  # When someone boosts while linked, it posts a celebration message
+  boost-announcements: "000000000000000000"
+  
+  # Channel for logging link/unlink activity (staff-only channel recommended)
+  # Shows when players link or unlink their accounts
+  link-logs: "000000000000000000"
+
+# =============================================================================
+# SLASH COMMANDS
+# =============================================================================
+# Configure which Discord slash commands are enabled.
+# These appear when users type "/" in your Discord server.
+# =============================================================================
+commands:
+  link:
+    # Enable the /link command in Discord
+    enabled: true
+    # Description shown in the slash command menu
+    description: "Link your Minecraft account to Discord"
     
-  link-start:
-    title: "🔗 Link Account"
-    description: "Run `/link %code%` in Minecraft to finish linking.\nCode expires in 5 minutes."</code></pre>
+  unlink:
+    enabled: true
+    description: "Unlink your Minecraft account"
+    
+  status:
+    enabled: true
+    description: "Check your boost status and rewards"</code></pre>
 
             <div class="footer-nav">
                 <a href="config.html" class="prev-page">← Previous: config.yml</a>
