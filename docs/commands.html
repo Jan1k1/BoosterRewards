@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commands - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html" class="active">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Commands</h1>
+
+            <h2>Player Commands</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Alias</th>
+                        <th>Description</th>
+                        <th>Permission</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/link [code]</code></td>
+                        <td>None</td>
+                        <td>Link your Minecraft account to Discord</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><code>/unlink</code></td>
+                        <td><code>/logout</code></td>
+                        <td>Unlink your Discord account</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><code>/claim</code></td>
+                        <td>None</td>
+                        <td>Claim any pending rewards</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><code>/br info</code></td>
+                        <td>None</td>
+                        <td>View your current boost status</td>
+                        <td>None</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Admin Commands</h2>
+            <p>Main Command: <code>/boosterrewards</code> or <code>/br</code></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                        <th>Permission</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/br reload</code></td>
+                        <td>Reload all config files</td>
+                        <td><code>boosterrewards.admin</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>/br admin</code></td>
+                        <td>Open the admin GUI</td>
+                        <td><code>boosterrewards.admin</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>/br sync [player]</code></td>
+                        <td>Force reward sync for a player</td>
+                        <td><code>boosterrewards.admin</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>/br forceunlink &lt;player&gt;</code></td>
+                        <td>Force unlink a player's account</td>
+                        <td><code>boosterrewards.admin</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Discord Commands</h2>
+            <p>Slash commands available in your Discord server.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/link</code></td>
+                        <td>Get a code to link your account</td>
+                    </tr>
+                    <tr>
+                        <td><code>/unlink</code></td>
+                        <td>Unlink your current Minecraft account</td>
+                    </tr>
+                    <tr>
+                        <td><code>/status</code></td>
+                        <td>Check your current boost status and rewards</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="footer-nav">
+                <a href="messages.html" class="prev-page">← Previous: messages.yml</a>
+                <a href="permissions.html" class="next-page">Next: Permissions →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

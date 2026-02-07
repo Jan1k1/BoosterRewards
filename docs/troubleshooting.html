@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troubleshooting - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html" class="active">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Troubleshooting</h1>
+
+            <h2 id="bot-not-connecting">Bot Not Connecting</h2>
+            <div class="error-box">
+                Error: <code>[JDA] Login Exception: The provided token is invalid!</code>
+            </div>
+            <ul>
+                <li><strong>Cause:</strong> The token in <code>discord.yml</code> is incorrect.</li>
+                <li><strong>Fix:</strong> Regenerate your token in the <a
+                        href="https://discord.com/developers/applications">Discord Developer Portal</a> and update
+                    <code>discord.yml</code>.</li>
+            </ul>
+
+            <div class="error-box">
+                Error: <code>[JDA] GatewayIntent.GUILD_MEMBERS is not enabled!</code>
+            </div>
+            <ul>
+                <li><strong>Cause:</strong> "Server Members Intent" is disabled.</li>
+                <li><strong>Fix:</strong> Go to Developer Portal → Bot → Privileged Gateway Intents → Enable "Server
+                    Members Intent".</li>
+            </ul>
+
+            <h2 id="commands-not-appearing">Slash Commands Not Appearing</h2>
+            <ul>
+                <li><strong>Cause:</strong> Bot missing permissions or scopes.</li>
+                <li><strong>Fix:</strong> Ensure you invited the bot with <code>applications.commands</code> scope. Kick
+                    the bot and re-invite using the correct link.</li>
+            </ul>
+
+            <h2 id="rewards-not-giving">Rewards Not Giving</h2>
+            <ul>
+                <li>Check console for errors when you boost.</li>
+                <li>Ensure <code>rewards.booster.enabled</code> is set to <code>true</code> in <code>config.yml</code>.
+                </li>
+                <li>Verify your link status with <code>/status</code> in Discord.</li>
+                <li>Check if you have permission <code>boosterrewards.claim</code>.</li>
+            </ul>
+
+            <h2 id="database-errors">Database Errors</h2>
+            <div class="error-box">
+                Error: <code>SQLSyntaxErrorException: Table 'boosterrewards' doesn't exist</code>
+            </div>
+            <ul>
+                <li><strong>Cause:</strong> Database not initialized or corrupt.</li>
+                <li><strong>Fix:</strong> Delete <code>database/boosterrewards.db</code> (if using H2) or drop tables
+                    (if MySQL) and restart server.</li>
+            </ul>
+
+            <div class="footer-nav">
+                <a href="advanced-rewards.html" class="prev-page">← Previous: Advanced Rewards</a>
+                <a href="faq.html" class="next-page">Next: FAQ →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

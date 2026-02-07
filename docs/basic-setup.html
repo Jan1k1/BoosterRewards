@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Setup - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html" class="active">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Basic Setup Examples</h1>
+
+            <h2>LuckPerms Rank Reward</h2>
+            <p>The most common setup. Give a player a LuckPerms group when they boost.</p>
+
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      - "lp user %player% parent add booster"
+      - "msg %player% &dYou have received the Booster rank!"
+    on-stop:
+      - "lp user %player% parent remove booster"
+      - "msg %player% &cYour Booster rank has expired."</code></pre>
+
+            <h2>Item Rewards</h2>
+            <p>Give physical items using the <code>give</code> command.</p>
+
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      # Give 64 diamonds
+      - "give %player% diamond 64"
+      # Give a custom renamed item (using essentials/cmi command)
+      - "give %player% diamond_sword 1 name:&dBooster_Sword"</code></pre>
+
+            <h2>Economy Rewards</h2>
+            <p>Give money using Vault/Essentials economy.</p>
+
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      - "eco give %player% 5000"
+      - "broadcast &d%player% just boosted the server!"</code></pre>
+
+            <div class="footer-nav">
+                <a href="placeholders.html" class="prev-page">← Previous: Placeholders</a>
+                <a href="advanced-rewards.html" class="next-page">Next: Advanced Rewards →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

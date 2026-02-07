@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placeholders - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html" class="active">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Placeholders</h1>
+
+            <p>These placeholders can be used in <strong>reward commands</strong> and <strong>messages</strong>.</p>
+
+            <h2>Player Placeholders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Placeholder</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>%player%</code></td>
+                        <td>Minecraft username</td>
+                        <td>Notch</td>
+                    </tr>
+                    <tr>
+                        <td><code>%uuid%</code></td>
+                        <td>Player UUID</td>
+                        <td>069a79f4-44e9-4726-a5be-fca90e38aaf5</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Discord Placeholders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Placeholder</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>%discord_user%</code></td>
+                        <td>Discord username</td>
+                        <td>user#0000</td>
+                    </tr>
+                    <tr>
+                        <td><code>%discord_id%</code></td>
+                        <td>Discord User ID</td>
+                        <td>123456789012345678</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Boost Placeholders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Placeholder</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>%boost_start%</code></td>
+                        <td>Date boost started</td>
+                        <td>2026-02-07 14:30:00</td>
+                    </tr>
+                    <tr>
+                        <td><code>%boost_duration%</code></td>
+                        <td>Duration of boost</td>
+                        <td>2 weeks, 3 days</td>
+                    </tr>
+                    <tr>
+                        <td><code>%tier%</code></td>
+                        <td>Reward tier name</td>
+                        <td>booster</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>PlaceholderAPI Support</h2>
+            <p>We provide standard PlaceholderAPI expansions for use in other plugins (tab, scoreboard, etc).</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Placeholder</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>%boosterrewards_is_boosting%</code></td>
+                        <td>Returns "true" or "false"</td>
+                    </tr>
+                    <tr>
+                        <td><code>%boosterrewards_discord_user%</code></td>
+                        <td>Linked Discord username</td>
+                    </tr>
+                    <tr>
+                        <td><code>%boosterrewards_boost_duration%</code></td>
+                        <td>Readable duration string</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="footer-nav">
+                <a href="permissions.html" class="prev-page">← Previous: Permissions</a>
+                <a href="basic-setup.html" class="next-page">Next: Basic Setup →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

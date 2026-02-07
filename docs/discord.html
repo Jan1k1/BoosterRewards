@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Configuration - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html" class="active">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Discord Configuration (discord.yml)</h1>
+
+            <p>The <code>discord.yml</code> file contains sensitive information for connecting to your Discord bot.</p>
+
+            <div class="warning-box">
+                <strong>Security Warning:</strong> Never share your <code>discord.yml</code> file or your bot token. Any
+                user with your token can control your bot.
+            </div>
+
+            <h2>Bot Credentails</h2>
+            <pre><code>bot:
+  # Your Discord Bot Token
+  token: "OTk5..."
+  
+  # Your Discord Server ID (Right click server -> Copy ID)
+  guild-id: "123456789012345678"
+  
+  # Activity to show on the bot
+  activity: "Watching Server Boosters"
+  
+  # Status: ONLINE, IDLE, DND, INVISIBLE
+  status: ONLINE</code></pre>
+
+            <h2>Channel Settings</h2>
+            <pre><code>channels:
+  # Channel to send boost logs/announcements
+  logs: "123456789012345678"
+  
+  # Channel to send database errors (admin only)
+  errors: "123456789012345678"</code></pre>
+
+            <h2>Role Settings</h2>
+            <pre><code>roles:
+  # Role ID given to linked players (optional)
+  linked: "123456789012345678"
+  
+  # Role ID for boosters (used to verify status)
+  booster: "123456789012345678"</code></pre>
+
+            <h2>Messages</h2>
+            <p>Customize the embeds sent by the Discord bot.</p>
+            <pre><code>messages:
+  embed-color: "#ff73fa"
+  
+  link-success:
+    title: "✅ Account Linked"
+    description: "Successfully linked to **%player%**!"
+    
+  link-start:
+    title: "🔗 Link Account"
+    description: "Run `/link %code%` in Minecraft to finish linking.\nCode expires in 5 minutes."</code></pre>
+
+            <div class="footer-nav">
+                <a href="config.html" class="prev-page">← Previous: config.yml</a>
+                <a href="messages.html" class="next-page">Next: messages.yml →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

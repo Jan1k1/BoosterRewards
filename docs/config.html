@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html" class="active">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Configuration (config.yml)</h1>
+
+            <p>The <code>config.yml</code> file controls the core behavior of the plugin, including database settings,
+                reward definitions, and synchronization timings.</p>
+
+            <h2>Database Settings</h2>
+            <pre><code>database:
+  # Type of database: H2, MYSQL, or MARIADB
+  type: H2
+  
+  # Database connection details (only for MySQL/MariaDB)
+  host: "localhost"
+  port: 3306
+  database: "boosterrewards"
+  username: "root"
+  password: ""
+  
+  # Connection pool settings
+  pool-size: 10
+  connection-timeout: 5000</code></pre>
+
+            <div class="info-box">
+                <strong>Recommended:</strong> Use <code>H2</code> for single servers (no setup needed). Use
+                <code>MYSQL</code> or <code>MARIADB</code> for BungeeCord/Velocity networks to sync data across servers.
+            </div>
+
+            <h2>Rewards Configuration</h2>
+            <p>Define what happens when players boost your server.</p>
+
+            <pre><code>rewards:
+  # Unique identifier for the reward tier
+  booster:
+    # Enable or disable this tier
+    enabled: true
+    
+    # Permission required to receive this reward (optional)
+    permission: "boosterrewards.booster"
+    
+    # Commands to run when player starts boosting
+    on-boost:
+      - "lp user %player% parent add booster"
+      - "give %player% diamond 5"
+      - "eco give %player% 5000"
+      - "msg %player% &dThanks for boosting!"
+    
+    # Commands to run when boost expires
+    on-stop:
+      - "lp user %player% parent remove booster"
+      - "msg %player% &cYour boost has expired."
+    
+    # Run commands only once per player?
+    one-time: false</code></pre>
+
+            <h3>Command Prefixes</h3>
+            <ul>
+                <li><code>console:</code> (or no prefix) - Executes command as console</li>
+                <li><code>player:</code> - Executes command as the player</li>
+                <li><code>msg:</code> - Sends a message to the player</li>
+                <li><code>broadcast:</code> - Broadcasts a message to the server</li>
+            </ul>
+
+            <h2>Synchronization</h2>
+            <pre><code>sync:
+  # How often to check for boost status changes (in seconds)
+  interval: 300
+  
+  # Remove rewards immediately when boost expires?
+  remove-rewards-on-stop: true
+  
+  # Check status when player joins?
+  check-on-join: true
+  
+  # Force sync on server startup?
+  verify-on-startup: true</code></pre>
+
+            <h2>Linking Settings</h2>
+            <pre><code>linking:
+  # Linking mode: DISCORD_TO_MINECRAFT or MINECRAFT_TO_DISCORD
+  mode: DISCORD_TO_MINECRAFT
+  
+  # How long codes are valid (in seconds)
+  code-expiry: 300
+  
+  # Length of the linking code
+  code-length: 6
+  
+  # Allow players to unlink and relink?
+  allow-relink: true</code></pre>
+
+            <div class="footer-nav">
+                <a href="installation.html" class="prev-page">← Previous: Installation</a>
+                <a href="discord.html" class="next-page">Next: discord.yml →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

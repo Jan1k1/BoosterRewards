@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Rewards - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html" class="active">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Advanced Rewards</h1>
+
+            <h2>Multi-Tier System</h2>
+            <p>You can set up multiple reward tiers to give different rewards based on conditions. Note: Currently the
+                plugin triggers all enabled rewards for valid boosters, but you can use permissions to segregate them.
+            </p>
+
+            <pre><code>rewards:
+  # Tier 1: Basic Booster
+  basic:
+    enabled: true
+    on-boost:
+      - "give %player% diamond 5"
+      
+  # Tier 2: VIP Booster (Requires additional permission)
+  vip:
+    enabled: true
+    permission: "boosterrewards.vip"
+    on-boost:
+      - "give %player% netherite_ingot 1"
+      - "eco give %player% 10000"</code></pre>
+
+            <h2>Executing Player Commands</h2>
+            <p>Sometimes you want the player to execute a command themselves (e.g., opening a menu or claiming a kit).
+            </p>
+
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      # Force player to say something
+      - "player: me I just boosted the server!"
+      # Force player to run a command
+      - "player: kit claim booster"</code></pre>
+
+            <h2>Temporary Permissions</h2>
+            <p>Grant temporary permissions using LuckPerms context.</p>
+
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      # Add permission with 30 day expiry (if supported by permission plugin)
+      - "lp user %player% permission settemp essentials.fly true 30d"</code></pre>
+
+            <h2>Broadcasts and Announcements</h2>
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      - "broadcast &d&lBOOST! &f%player% just boosted the server!"
+      - "discord_broadcast: channel_id_here %player% boosted!"</code></pre>
+
+            <div class="footer-nav">
+                <a href="basic-setup.html" class="prev-page">← Previous: Basic Setup</a>
+                <a href="troubleshooting.html" class="next-page">Next: Troubleshooting →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

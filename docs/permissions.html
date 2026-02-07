@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permissions - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html" class="active">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Permissions</h1>
+
+            <h2>Standard Permissions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Permission</th>
+                        <th>Description</th>
+                        <th>Recommended For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>boosterrewards.link</code></td>
+                        <td>Allows linking account</td>
+                        <td>Everyone (default)</td>
+                    </tr>
+                    <tr>
+                        <td><code>boosterrewards.unlink</code></td>
+                        <td>Allows unlinking account</td>
+                        <td>Everyone (default)</td>
+                    </tr>
+                    <tr>
+                        <td><code>boosterrewards.claim</code></td>
+                        <td>Allows claiming rewards</td>
+                        <td>Everyone (default)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Admin Permissions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Permission</th>
+                        <th>Description</th>
+                        <th>Recommended For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>boosterrewards.admin</code></td>
+                        <td>Full access to all commands</td>
+                        <td>Admins / Ops</td>
+                    </tr>
+                    <tr>
+                        <td><code>boosterrewards.reload</code></td>
+                        <td>Allows reloading config</td>
+                        <td>Admins</td>
+                    </tr>
+                    <tr>
+                        <td><code>boosterrewards.gui</code></td>
+                        <td>Access to admin GUI</td>
+                        <td>Admins</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Reward Permissions</h2>
+            <p>You can define custom permissions for specific reward tiers in <code>config.yml</code>.</p>
+
+            <pre><code>rewards:
+  booster:
+    # Requires permission: boosterrewards.booster
+    permission: "boosterrewards.booster"</code></pre>
+
+            <div class="info-box">
+                <strong>Wildcard:</strong> <code>boosterrewards.*</code> grants all permissions.
+            </div>
+
+            <div class="footer-nav">
+                <a href="commands.html" class="prev-page">← Previous: Commands</a>
+                <a href="placeholders.html" class="next-page">Next: Placeholders →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

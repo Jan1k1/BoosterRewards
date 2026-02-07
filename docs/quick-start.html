@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Start - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html" class="active">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Quick Start Guide</h1>
+
+            <p>Get up and running in under 5 minutes.</p>
+
+            <h2>1. create Bot</h2>
+            <ul>
+                <li>Create bot at <a href="https://discord.com/developers/applications">Discord Dev Portal</a>.</li>
+                <li>Enable "Server Members Intent".</li>
+                <li>Invite to server with <code>bot</code> and <code>applications.commands</code>.</li>
+            </ul>
+
+            <h2>2. Install</h2>
+            <ul>
+                <li>Drop JAR in <code>plugins/</code>.</li>
+                <li>Restart server.</li>
+            </ul>
+
+            <h2>3. Configure</h2>
+            <ul>
+                <li>Put Token & ID in <code>discord.yml</code>.</li>
+                <li>Set rewards in <code>config.yml</code>.</li>
+                <li>Restart server.</li>
+            </ul>
+
+            <h2>4. Test</h2>
+            <ul>
+                <li>Run <code>/link</code> in Discord.</li>
+                <li>Run <code>/link &lt;code&gt;</code> in Minecraft.</li>
+                <li>Boost server and check rewards!</li>
+            </ul>
+
+            <div class="footer-nav">
+                <a href="installation.html" class="prev-page">← Previous: Installation</a>
+                <a href="config.html" class="next-page">Next: Configuration →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
