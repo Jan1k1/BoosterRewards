@@ -77,6 +77,7 @@ public class DatabaseManager {
                 "uuid VARCHAR(36), " +
                 "username VARCHAR(16), " +
                 "boost_start BIGINT NOT NULL, " +
+                "boost_count INT DEFAULT 1, " +
                 "is_active BOOLEAN DEFAULT TRUE, " +
                 "last_checked BIGINT" +
                 ");";
@@ -88,6 +89,14 @@ public class DatabaseManager {
             try (PreparedStatement stmt = conn.prepareStatement(boostersTable)) {
                 stmt.execute();
             }
+
+            // Alter table for existing installations
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "ALTER TABLE " + tablePrefix + "boosters ADD COLUMN IF NOT EXISTS boost_count INT DEFAULT 1")) {
+                stmt.execute();
+            } catch (SQLException ignored) {
+            }
+
             try (PreparedStatement stmt = conn
                     .prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "pending_rewards (" +
                             "id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -207,16 +216,16 @@ public class DatabaseManager {
         }
     }
 
-    public void saveBooster(String discordId, UUID uuid, String username, long boostStart) {
+    public void saveBooster(String discordId, UUID uuid, String username, long boostStart, int boostCount) {
         String sql = "INSERT INTO " + tablePrefix
-                + "boosters (discord_id, uuid, username, boost_start, is_active, last_checked) "
-                + "VALUES (?, ?, ?, ?, TRUE, ?) "
+                + "boosters (discord_id, uuid, username, boost_start, boost_count, is_active, last_checked) "
+                + "VALUES (?, ?, ?, ?, ?, TRUE, ?) "
                 + "ON DUPLICATE KEY UPDATE uuid = VALUES(uuid), username = VALUES(username), "
-                + "boost_start = VALUES(boost_start), is_active = TRUE, last_checked = VALUES(last_checked)";
+                + "boost_start = VALUES(boost_start), boost_count = VALUES(boost_count), is_active = TRUE, last_checked = VALUES(last_checked)";
         if (plugin.getConfig().getString("database.type", "H2").equalsIgnoreCase("H2")) {
             sql = "MERGE INTO " + tablePrefix
-                    + "boosters (discord_id, uuid, username, boost_start, is_active, last_checked) "
-                    + "KEY (discord_id) VALUES (?, ?, ?, ?, TRUE, ?)";
+                    + "boosters (discord_id, uuid, username, boost_start, boost_count, is_active, last_checked) "
+                    + "KEY (discord_id) VALUES (?, ?, ?, ?, ?, TRUE, ?)";
         }
 
         try (Connection conn = getConnection();
@@ -225,7 +234,8 @@ public class DatabaseManager {
             stmt.setString(2, uuid != null ? uuid.toString() : null);
             stmt.setString(3, username);
             stmt.setLong(4, boostStart);
-            stmt.setLong(5, System.currentTimeMillis());
+            stmt.setInt(5, boostCount);
+            stmt.setLong(6, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -244,18 +254,19 @@ public class DatabaseManager {
         }
     }
 
-    public void setBoosterStatus(UUID uuid, boolean isBooster) {
+    public void setBoosterStatus(UUID uuid, boolean isBooster, int boostCount) {
         String discordId = getDiscordId(uuid);
         if (discordId == null)
             return;
 
         if (isBooster) {
             String sql = "UPDATE " + tablePrefix
-                    + "boosters SET is_active = TRUE, last_checked = ? WHERE discord_id = ?";
+                    + "boosters SET is_active = TRUE, boost_count = ?, last_checked = ? WHERE discord_id = ?";
             try (Connection conn = getConnection();
                     PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setLong(1, System.currentTimeMillis());
-                stmt.setString(2, discordId);
+                stmt.setInt(1, boostCount);
+                stmt.setLong(2, System.currentTimeMillis());
+                stmt.setString(3, discordId);
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -335,6 +346,44 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public int getBoostCount(UUID uuid) {
+        String discordId = getDiscordId(uuid);
+        if (discordId == null)
+            return 0;
+
+        String sql = "SELECT boost_count FROM " + tablePrefix + "boosters WHERE discord_id = ? AND is_active = TRUE";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, discordId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next())
+                    return rs.getInt("boost_count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public boolean isBoosting(UUID uuid) {
+        String discordId = getDiscordId(uuid);
+        if (discordId == null)
+            return false;
+
+        String sql = "SELECT is_active FROM " + tablePrefix + "boosters WHERE discord_id = ?";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, discordId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next())
+                    return rs.getBoolean("is_active");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public Connection getConnection() throws SQLException {

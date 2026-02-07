@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
-import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -24,7 +23,6 @@ import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.core.LinkManager;
 import studio.jan1k.boosterrewards.utils.Logs;
 
-import java.util.Collections;
 import java.util.UUID;
 
 public class DiscordBot extends ListenerAdapter {
@@ -90,22 +88,40 @@ public class DiscordBot extends ListenerAdapter {
             return;
 
         String discordId = member.getId();
+        Guild guild = member.getGuild();
         boolean isNowBoosting = member.getTimeBoosted() != null;
+
+        // Calculate boost count: JDA Member doesn't have getBoostCount(),
+        // but Guild.getBoosters() contains a Member for each active boost.
+        int boostCount = 0;
+        for (Member booster : guild.getBoosters()) {
+            if (booster.getId().equals(discordId)) {
+                boostCount++;
+            }
+        }
 
         UUID uuid = plugin.getDatabaseManager().getUuid(discordId);
         if (uuid == null)
             return;
 
         if (isNowBoosting) {
-            Logs.info("User " + member.getEffectiveName() + " started boosting in Discord!");
+            Logs.info(
+                    "User " + member.getEffectiveName() + " started boosting in Discord! (Boosts: " + boostCount + ")");
             plugin.getDatabaseManager().saveBooster(discordId, uuid, member.getEffectiveName(),
-                    System.currentTimeMillis());
+                    System.currentTimeMillis(), boostCount);
             plugin.getRewardManager().giveReward(uuid, "booster");
+
+            // If they have 2+ boosts, also give tier 2
+            if (boostCount >= 2 && plugin.getConfig().getBoolean("rewards.booster_2.enabled", false)) {
+                plugin.getRewardManager().giveReward(uuid, "booster_2");
+            }
+
             announceBoost(member, uuid);
         } else {
             Logs.info("User " + member.getEffectiveName() + " stopped boosting in Discord.");
             plugin.getDatabaseManager().setBoosterInactive(discordId);
             plugin.getRewardManager().revokeReward(uuid, "booster");
+            plugin.getRewardManager().revokeReward(uuid, "booster_2");
         }
     }
 

@@ -23,6 +23,22 @@ public class ClaimCommand implements CommandExecutor {
         }
 
         Player player = (Player) sender;
+
+        // 1. Check if linked
+        String discordId = plugin.getDatabaseManager().getDiscordId(player.getUniqueId());
+        if (discordId == null) {
+            player.sendMessage(ChatColor.RED + "❌ You must link your account before you can claim rewards!");
+            player.sendMessage(ChatColor.GRAY + "Use /link to connect your Discord account.");
+            return true;
+        }
+
+        // 2. Check if boosting
+        if (!plugin.getDatabaseManager().isBoosting(player.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "❌ You are not currently boosting the server!");
+            player.sendMessage(ChatColor.GRAY + "Boost our Discord server to unlock rewards!");
+            return true;
+        }
+
         new studio.jan1k.boosterrewards.gui.ClaimSelectorGUI(plugin, player);
 
         return true;
