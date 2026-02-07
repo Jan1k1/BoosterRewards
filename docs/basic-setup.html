@@ -6,16 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Basic Setup - BoosterRewards Wiki</title>
     <link rel="stylesheet" href="wiki.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 </head>
 
 <body>
     <div class="wiki-header">
         <div class="header-content">
-            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <h1>BoosterRewards Wiki</h1>
             <nav class="header-nav">
                 <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
                 <a href="https://discord.gg/38Ebj42e">Discord</a>
                 <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+                <a href="https://github.com/jan1k1.png" style="padding: 0;"><img src="https://github.com/jan1k1.png"
+                        style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;"></a>
             </nav>
         </div>
     </div>
@@ -74,7 +77,15 @@
             <h2>LuckPerms Rank Reward</h2>
             <p>The most common setup. Give a player a LuckPerms group when they boost.</p>
 
-            <pre><code>rewards:
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">rank-reward.yml</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">rewards:
   booster:
     enabled: true
     on-boost:
@@ -83,11 +94,20 @@
     on-stop:
       - "lp user %player% parent remove booster"
       - "msg %player% &cYour Booster rank has expired."</code></pre>
+            </div>
 
             <h2>Item Rewards</h2>
             <p>Give physical items using the <code>give</code> command.</p>
 
-            <pre><code>rewards:
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">item-rewards.yml</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">rewards:
   booster:
     enabled: true
     on-boost:
@@ -95,16 +115,26 @@
       - "give %player% diamond 64"
       # Give a custom renamed item (using essentials/cmi command)
       - "give %player% diamond_sword 1 name:&dBooster_Sword"</code></pre>
+            </div>
 
             <h2>Economy Rewards</h2>
             <p>Give money using Vault/Essentials economy.</p>
 
-            <pre><code>rewards:
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">economy-rewards.yml</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">rewards:
   booster:
     enabled: true
     on-boost:
       - "eco give %player% 5000"
       - "broadcast &d%player% just boosted the server!"</code></pre>
+            </div>
 
             <div class="footer-nav">
                 <a href="placeholders.html" class="prev-page">← Previous: Placeholders</a>
@@ -112,6 +142,20 @@
             </div>
         </main>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script>
+        function copyCode(btn) {
+            const pre = btn.closest('.code-window').querySelector('pre');
+            const code = pre.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = originalText, 2000);
+            });
+        }
+    </script>
 </body>
 
 </html>
