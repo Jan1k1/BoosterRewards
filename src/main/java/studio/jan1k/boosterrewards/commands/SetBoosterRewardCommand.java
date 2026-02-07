@@ -24,7 +24,12 @@ public class SetBoosterRewardCommand implements CommandExecutor {
         }
 
         if (sender instanceof Player) {
-            new AdminGUI(plugin, false).open((Player) sender);
+            Player player = (Player) sender;
+            if (args.length == 0) {
+                new AdminGUI(plugin).open(player);
+            } else {
+                player.sendMessage(ChatColor.RED + "Usage: /setboosterreward");
+            }
         } else {
             sender.sendMessage(ChatColor.RED + "Console cannot use the reward editor GUI.");
         }

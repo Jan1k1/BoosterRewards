@@ -44,7 +44,38 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 new LinkCommand(plugin).onCommand(sender, command, "link", linkArgs);
                 break;
             case "unlink":
-                new UnlinkCommand(plugin).onCommand(sender, command, "unlink", new String[0]);
+                if (args.length > 1) {
+                    // Admin force unlink: /br unlink <player>
+                    if (!sender.hasPermission("boosterrewards.admin")) {
+                        sender.sendMessage(ChatColor.RED + "No permission.");
+                        return true;
+                    }
+                    String targetName = args[1];
+                    org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(targetName);
+                    if (target == null) { // Deprecated but standard for offline players by name
+                        sender.sendMessage(ChatColor.RED + "Player not found.");
+                        return true;
+                    }
+                    java.util.UUID uuid = target.getUniqueId();
+                    String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
+
+                    if (discordId == null) {
+                        sender.sendMessage(ChatColor.RED + targetName + " is not linked to any Discord account.");
+                        return true;
+                    }
+
+                    plugin.getDatabaseManager().removeUser(uuid);
+                    plugin.removeCachedPlayer(uuid);
+                    sender.sendMessage(ChatColor.GREEN + "Successfully unlinked " + targetName + ".");
+
+                    if (target.isOnline()) {
+                        ((org.bukkit.entity.Player) target)
+                                .sendMessage(ChatColor.RED + "Your account has been unlinked by an administrator.");
+                    }
+                } else {
+                    // Self unlink
+                    new UnlinkCommand(plugin).onCommand(sender, command, "unlink", new String[0]);
+                }
                 break;
             case "claim":
                 new ClaimCommand(plugin).onCommand(sender, command, "claim", new String[0]);

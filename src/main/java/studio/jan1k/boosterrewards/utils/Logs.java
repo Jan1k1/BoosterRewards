@@ -75,7 +75,6 @@ public class Logs {
     }
 
     public static void bannerAccent(String message) {
-        Bukkit.getConsoleSender().sendMessage(message);
+        Bukkit.getConsoleSender().sendMessage(message + RESET);
     }
 }
-

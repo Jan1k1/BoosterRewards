@@ -23,43 +23,115 @@ public class AdminGUI implements Listener, InventoryHolder {
 
     private final BoosterReward plugin;
     private final Inventory inventory;
-    private boolean isEditor = false;
+    private final GuiMode mode;
+    private final String rewardPath;
 
-    public AdminGUI(BoosterReward plugin, boolean editor) {
+    public enum GuiMode {
+        MAIN_MENU,
+        REWARD_SELECTOR,
+        EDITOR
+    }
+
+    public AdminGUI(BoosterReward plugin, GuiMode mode, String rewardPath) {
         this.plugin = plugin;
-        this.isEditor = editor;
-        if (editor) {
-            this.inventory = Bukkit.createInventory(this, 54, "Drop Items to Add Rewards");
+        this.mode = mode;
+        this.rewardPath = rewardPath;
+
+        if (mode == GuiMode.EDITOR) {
+            String title = "Editing: " + (rewardPath.contains("booster_2") ? "Booster Lvl 2" : "Booster Lvl 1");
+            this.inventory = Bukkit.createInventory(this, 54, title);
             loadRewards();
+        } else if (mode == GuiMode.REWARD_SELECTOR) {
+            this.inventory = Bukkit.createInventory(this, 27, "Select Reward Tier");
+            setupSelectorMenu();
         } else {
             this.inventory = Bukkit.createInventory(this, 27, "BoosterReward Admin");
             setupMainMenu();
         }
     }
 
+    // Default constructor for Main Menu
+    public AdminGUI(BoosterReward plugin) {
+        this(plugin, GuiMode.MAIN_MENU, null);
+    }
+
     private void setupMainMenu() {
+        fillGlass();
+
+        // Button: Edit Rewards (Opens Selector)
+        ItemStack rewardsBtn = new ItemStack(Material.DIAMOND_CHESTPLATE);
+        ItemMeta rm = rewardsBtn.getItemMeta();
+        rm.setDisplayName(ChatColor.AQUA + "Edit Rewards");
+        rm.setLore(Arrays.asList(
+                ChatColor.GRAY + "Configure items given to boosters",
+                ChatColor.GRAY + "Supports multiple tiers"));
+        rewardsBtn.setItemMeta(rm);
+        inventory.setItem(11, rewardsBtn);
+
+        // Button: Post Discord Panel
+        ItemStack discordBtn = new ItemStack(Material.BOOK);
+        ItemMeta dm = discordBtn.getItemMeta();
+        dm.setDisplayName(ChatColor.LIGHT_PURPLE + "Post Link Panel");
+        dm.setLore(Arrays.asList(
+                ChatColor.GRAY + "Click to post the Link Account embed",
+                ChatColor.GRAY + "to the configured Discord channel."));
+        discordBtn.setItemMeta(dm);
+        inventory.setItem(13, discordBtn);
+
+        // Button: Reload Config
+        ItemStack reloadBtn = new ItemStack(Material.REDSTONE_TORCH);
+        ItemMeta rlm = reloadBtn.getItemMeta();
+        rlm.setDisplayName(ChatColor.RED + "Reload Config");
+        rlm.setLore(Arrays.asList(ChatColor.GRAY + "Reloads all configuration files"));
+        reloadBtn.setItemMeta(rlm);
+        inventory.setItem(15, reloadBtn);
+    }
+
+    private void setupSelectorMenu() {
+        fillGlass();
+
+        // Tier 1
+        ItemStack t1 = new ItemStack(Material.EMERALD);
+        ItemMeta m1 = t1.getItemMeta();
+        m1.setDisplayName(ChatColor.GREEN + "Booster Tier 1");
+        m1.setLore(Arrays.asList(ChatColor.GRAY + "Standard Server Booster"));
+        t1.setItemMeta(m1);
+        inventory.setItem(11, t1);
+
+        // Tier 2
+        ItemStack t2 = new ItemStack(Material.NETHER_STAR);
+        ItemMeta m2 = t2.getItemMeta();
+        m2.setDisplayName(ChatColor.LIGHT_PURPLE + "Booster Tier 2");
+        m2.setLore(Arrays.asList(
+                ChatColor.GRAY + "Double Booster (Nitro)",
+                ChatColor.GRAY + "Requires 'booster_2' in config"));
+        t2.setItemMeta(m2);
+        inventory.setItem(15, t2);
+
+        // Back
+        ItemStack back = new ItemStack(Material.ARROW);
+        ItemMeta bm = back.getItemMeta();
+        bm.setDisplayName(ChatColor.RED + "Back to Main Menu");
+        back.setItemMeta(bm);
+        inventory.setItem(22, back);
+    }
+
+    private void fillGlass() {
         ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = filler.getItemMeta();
         meta.setDisplayName(" ");
         filler.setItemMeta(meta);
-
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, filler);
         }
-
-        ItemStack editorBtn = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        ItemMeta em = editorBtn.getItemMeta();
-        em.setDisplayName(ChatColor.AQUA + "Edit Booster Rewards");
-        em.setLore(Arrays.asList(ChatColor.GRAY + "Click to manage items given on boost"));
-        editorBtn.setItemMeta(em);
-        inventory.setItem(13, editorBtn);
     }
 
     @SuppressWarnings("unchecked")
     private void loadRewards() {
-        if (!plugin.getConfig().contains("rewards.booster.on-boost.items"))
+        if (rewardPath == null || !plugin.getConfig().contains(rewardPath))
             return;
-        List<Map<?, ?>> items = plugin.getConfig().getMapList("rewards.booster.on-boost.items");
+
+        List<Map<?, ?>> items = plugin.getConfig().getMapList(rewardPath);
         for (Map<?, ?> map : items) {
             try {
                 inventory.addItem(ItemSerializer.deserialize((Map<String, Object>) map));
@@ -82,11 +154,39 @@ public class AdminGUI implements Listener, InventoryHolder {
         if (!(event.getInventory().getHolder() instanceof AdminGUI))
             return;
         AdminGUI gui = (AdminGUI) event.getInventory().getHolder();
+        Player player = (Player) event.getWhoClicked();
 
-        if (!gui.isEditor) {
+        if (gui.mode != GuiMode.EDITOR) {
             event.setCancelled(true);
-            if (event.getSlot() == 13) {
-                new AdminGUI(plugin, true).open((Player) event.getWhoClicked());
+            int slot = event.getSlot();
+
+            if (gui.mode == GuiMode.MAIN_MENU) {
+                if (slot == 11) { // Edit Rewards -> Selector
+                    new AdminGUI(plugin, GuiMode.REWARD_SELECTOR, null).open(player);
+                } else if (slot == 13) { // Post Panel
+                    String channelId = plugin.getConfig().getString("panel.channel-id");
+                    if (channelId == null || channelId.equals("000000000000000000")) {
+                        player.sendMessage(ChatColor.RED + "Please configure panel.channel-id in config.yml first!");
+                        player.closeInventory();
+                        return;
+                    }
+                    player.sendMessage(ChatColor.YELLOW + "Posting link panel to Discord...");
+                    plugin.getDiscordBot().postLinkPanel(channelId, player);
+                    player.closeInventory();
+                } else if (slot == 15) { // Reload
+                    plugin.reloadConfig();
+                    plugin.getConfigManager().loadFullConfigs();
+                    player.sendMessage(ChatColor.GREEN + "Configuration reloaded!");
+                    player.closeInventory();
+                }
+            } else if (gui.mode == GuiMode.REWARD_SELECTOR) {
+                if (slot == 11) { // Tier 1
+                    new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster.on-boost.items").open(player);
+                } else if (slot == 15) { // Tier 2
+                    new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster_2.on-boost.items").open(player);
+                } else if (slot == 22) { // Back
+                    new AdminGUI(plugin).open(player);
+                }
             }
         }
     }
@@ -97,22 +197,23 @@ public class AdminGUI implements Listener, InventoryHolder {
             return;
         AdminGUI gui = (AdminGUI) event.getInventory().getHolder();
 
-        if (gui.isEditor) {
-            saveRewards(event.getInventory());
-            plugin.reloadConfig();
-            event.getPlayer().sendMessage(ChatColor.GREEN + "Rewards saved!");
+        // Save only if looking at an editor
+        if (gui.mode == GuiMode.EDITOR && gui.rewardPath != null) {
+            saveRewards(event.getInventory(), gui.rewardPath);
+            plugin.reloadConfig(); // Reload to apply changes immediately
+            event.getPlayer().sendMessage(ChatColor.GREEN + "Rewards saved for "
+                    + (gui.rewardPath.contains("booster_2") ? "Tier 2" : "Tier 1") + "!");
         }
     }
 
-    private void saveRewards(Inventory inv) {
+    private void saveRewards(Inventory inv, String path) {
         List<Map<String, Object>> list = new ArrayList<>();
         for (ItemStack item : inv.getContents()) {
             if (item != null && item.getType() != Material.AIR) {
                 list.add(ItemSerializer.serialize(item));
             }
         }
-        plugin.getConfig().set("rewards.booster.on-boost.items", list);
+        plugin.getConfig().set(path, list);
         plugin.saveConfig();
     }
 }
-

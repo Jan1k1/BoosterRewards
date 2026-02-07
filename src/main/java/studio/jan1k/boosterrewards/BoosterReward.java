@@ -30,6 +30,7 @@ public class BoosterReward extends JavaPlugin {
     private DatabaseManager databaseManager;
     private ConfigManager configManager;
     private RewardManager rewardManager;
+    private studio.jan1k.boosterrewards.core.ItemRewardHandler itemRewardHandler;
     private final java.util.Map<UUID, PlayerData> cache = new java.util.HashMap<>();
 
     @Override
@@ -88,6 +89,7 @@ public class BoosterReward extends JavaPlugin {
         Logs.info("Initializing modules...");
         this.databaseManager = new DatabaseManager(this);
         this.linkManager = new LinkManager();
+        this.itemRewardHandler = new studio.jan1k.boosterrewards.core.ItemRewardHandler(this);
         this.rewardManager = new RewardManager(this);
         this.discordBot = new DiscordBot(this, linkManager);
 
@@ -103,6 +105,9 @@ public class BoosterReward extends JavaPlugin {
         getCommand("setboosterreward").setExecutor(new SetBoosterRewardCommand(this));
         getCommand("setboosterreward").setTabCompleter(new EmptyTabCompleter());
 
+        getCommand("forceunlink").setExecutor(new studio.jan1k.boosterrewards.commands.ForceUnlinkCommand(this));
+        getCommand("forceunlink").setTabCompleter(new studio.jan1k.boosterrewards.commands.ForceUnlinkTabCompleter());
+
         MainCommand mainCmd = new MainCommand(this);
         getCommand("boosterrewards").setExecutor(mainCmd);
         getCommand("boosterrewards").setTabCompleter(mainCmd);
@@ -110,8 +115,10 @@ public class BoosterReward extends JavaPlugin {
         new RewardSyncTask(this).runTaskTimerAsynchronously(this, 100L,
                 getConfig().getLong("sync.interval", 300) * 20L);
 
-        getServer().getPluginManager().registerEvents(new AdminGUI(this, false), this);
+        getServer().getPluginManager().registerEvents(new AdminGUI(this), this);
         getServer().getPluginManager().registerEvents(new ClaimGUI(this), this);
+        getServer().getPluginManager().registerEvents(new studio.jan1k.boosterrewards.gui.ClaimSelectorGUI(this, null),
+                this);
         getServer().getPluginManager().registerEvents(new studio.jan1k.boosterrewards.listeners.PlayerListener(this),
                 this);
 
@@ -121,6 +128,20 @@ public class BoosterReward extends JavaPlugin {
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new studio.jan1k.boosterrewards.integrations.BoosterRewardsExpansion(this).register();
+        }
+
+        // Metrics
+        if (getConfig().getBoolean("features.metrics", true)) {
+            try {
+                new org.bstats.bukkit.Metrics(this, 29390);
+            } catch (NoClassDefFoundError e) {
+                Logs.warn("Metrics failed to initialize (Missing dependency). This is normal if using the Lite jar.");
+            }
+        }
+
+        // Update Checker
+        if (getConfig().getBoolean("features.update-checker", true)) {
+            new studio.jan1k.boosterrewards.utils.UpdateChecker(this);
         }
 
         // Module initialization complete
@@ -155,6 +176,9 @@ public class BoosterReward extends JavaPlugin {
         Logs.raw(" ");
         Logs.raw("  §fBOOSTER   Premium Discord Boosting System");
         Logs.raw("  §f© 2026 jan1k.studio - All Rights Reserved");
+        Logs.raw(" ");
+        Logs.raw("  §e⚠ Found a bug or have a suggestion?");
+        Logs.raw("  §b→ Join our Discord: §fhttps://discord.gg/38Ebj42e");
         Logs.raw(" ");
     }
 
@@ -203,6 +227,10 @@ public class BoosterReward extends JavaPlugin {
 
     public RewardManager getRewardManager() {
         return rewardManager;
+    }
+
+    public studio.jan1k.boosterrewards.core.ItemRewardHandler getItemRewardHandler() {
+        return itemRewardHandler;
     }
 
     public PlayerData getPlayerData(UUID uuid) {

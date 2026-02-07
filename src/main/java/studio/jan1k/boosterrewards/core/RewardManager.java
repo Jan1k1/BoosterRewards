@@ -28,19 +28,14 @@ public class RewardManager {
                 if (player == null)
                     return;
 
+                // 1. Run Commands
                 for (String cmd : commands) {
                     executeCommand(player, cmd, discordId);
                 }
-            });
 
-            // Handle items (Admin GUI items)
-            // Note: The Admin GUI currently saves items to a separate path.
-            // We should ideally merge these or handle them both.
-            // For now, let's also trigger the item rewards if applicable.
-            if (tier.equals("booster")) {
-                // If it's the main booster tier, we can also give the items
-                // This will be expanded in future phases.
-            }
+                // 2. Give Custom Items
+                plugin.getItemRewardHandler().giveItemRewards(player, tier);
+            });
         });
     }
 

@@ -13,6 +13,7 @@ repositories {
     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url = 'https://jitpack.io' }
     maven { url = 'https://m2.dv8tion.net/releases' }
+    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
 }
 
 dependencies {
@@ -33,6 +34,9 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
+    
+    // bStats
+    implementation("org.bstats:bstats-bukkit:3.1.0")
 }
 
 tasks.named('shadowJar', ShadowJar) {
@@ -44,16 +48,20 @@ tasks.named('shadowJar', ShadowJar) {
     relocate 'com.h2database', 'studio.jan1k.boosterrewards.libs.h2'
     relocate 'org.slf4j', 'studio.jan1k.boosterrewards.libs.slf4j'
     relocate 'com.fasterxml.jackson', 'studio.jan1k.boosterrewards.libs.jackson'
+    relocate 'org.bstats', 'studio.jan1k.boosterrewards.libs.bstats'
 }
 
 task liteJar(type: ShadowJar) {
     archiveBaseName.set('BoosterRewards')
     archiveClassifier.set('Lite')
     from sourceSets.main.output
+    configurations = [project.configurations.runtimeClasspath]
     
     dependencies {
-        exclude(dependency('.*:.*'))
+        include(dependency('org.bstats:.*'))
     }
+    
+    relocate 'org.bstats', 'studio.jan1k.boosterrewards.libs.bstats'
 }
 
 tasks.build {

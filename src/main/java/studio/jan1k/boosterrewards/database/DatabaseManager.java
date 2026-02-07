@@ -93,6 +93,7 @@ public class DatabaseManager {
                             "id INT AUTO_INCREMENT PRIMARY KEY, " +
                             "uuid VARCHAR(36) NOT NULL, " +
                             "reward_data TEXT NOT NULL, " +
+                            "reward_type VARCHAR(32) NOT NULL DEFAULT 'booster', " +
                             "created_at BIGINT NOT NULL)")) {
                 stmt.execute();
             }
@@ -102,13 +103,15 @@ public class DatabaseManager {
         }
     }
 
-    public void addPendingReward(UUID uuid, String rewardData) {
-        String sql = "INSERT INTO " + tablePrefix + "pending_rewards (uuid, reward_data, created_at) VALUES (?, ?, ?)";
+    public void addPendingReward(UUID uuid, String rewardData, String rewardType) {
+        String sql = "INSERT INTO " + tablePrefix
+                + "pending_rewards (uuid, reward_data, reward_type, created_at) VALUES (?, ?, ?, ?)";
         try (Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
             stmt.setString(2, rewardData);
-            stmt.setLong(3, System.currentTimeMillis());
+            stmt.setString(3, rewardType);
+            stmt.setLong(4, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -117,7 +120,8 @@ public class DatabaseManager {
 
     public List<PendingReward> getPendingRewards(UUID uuid) {
         List<PendingReward> rewards = new ArrayList<>();
-        String sql = "SELECT id, reward_data, created_at FROM " + tablePrefix + "pending_rewards WHERE uuid = ?";
+        String sql = "SELECT id, reward_data, reward_type, created_at FROM " + tablePrefix
+                + "pending_rewards WHERE uuid = ?";
         try (Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
@@ -127,6 +131,7 @@ public class DatabaseManager {
                             rs.getInt("id"),
                             uuid,
                             rs.getString("reward_data"),
+                            rs.getString("reward_type"),
                             rs.getLong("created_at")));
                 }
             }
@@ -151,12 +156,14 @@ public class DatabaseManager {
         private final int id;
         private final UUID uuid;
         private final String rewardData;
+        private final String rewardType;
         private final long createdAt;
 
-        public PendingReward(int id, UUID uuid, String rewardData, long createdAt) {
+        public PendingReward(int id, UUID uuid, String rewardData, String rewardType, long createdAt) {
             this.id = id;
             this.uuid = uuid;
             this.rewardData = rewardData;
+            this.rewardType = rewardType;
             this.createdAt = createdAt;
         }
 
@@ -170,6 +177,10 @@ public class DatabaseManager {
 
         public String getRewardData() {
             return rewardData;
+        }
+
+        public String getRewardType() {
+            return rewardType;
         }
 
         public long getCreatedAt() {

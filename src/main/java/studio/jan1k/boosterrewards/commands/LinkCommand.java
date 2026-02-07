@@ -1,5 +1,9 @@
 package studio.jan1k.boosterrewards.commands;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -8,6 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.core.LinkManager;
+
+import java.util.UUID;
 
 public class LinkCommand implements CommandExecutor {
 
@@ -27,9 +33,10 @@ public class LinkCommand implements CommandExecutor {
         Player player = (Player) sender;
         String mode = plugin.getConfig().getString("linking.mode", "MINECRAFT_TO_DISCORD");
 
-        if (plugin.getPlayerData(player.getUniqueId()) != null) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    plugin.getConfigManager().getInGameMessage("link.already-linked")));
+        if (plugin.getDatabaseManager().getDiscordId(player.getUniqueId()) != null) {
+            String msg = plugin.getConfig().getString("messages.in-game.link.already-linked",
+                    "&cYou are already linked! Use /logout to unlink.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
             return true;
         }
 
@@ -44,7 +51,20 @@ public class LinkCommand implements CommandExecutor {
             }
 
             String code = plugin.getLinkManager().generateMinecraftCode(player.getUniqueId(), player.getName());
-            player.sendMessage(ChatColor.GREEN + "Your link code is: " + ChatColor.AQUA + ChatColor.BOLD + code);
+
+            TextComponent message = new TextComponent("Your link code is: ");
+            message.setColor(net.md_5.bungee.api.ChatColor.GREEN);
+
+            TextComponent codeComponent = new TextComponent(code);
+            codeComponent.setColor(net.md_5.bungee.api.ChatColor.AQUA);
+            codeComponent.setBold(true);
+            codeComponent.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
+            codeComponent.setHoverEvent(
+                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to copy").create()));
+
+            message.addExtra(codeComponent);
+
+            player.spigot().sendMessage(message);
             player.sendMessage(ChatColor.GRAY + "Run " + ChatColor.YELLOW + "/link " + code + ChatColor.GRAY
                     + " in our Discord server.");
 
@@ -53,8 +73,8 @@ public class LinkCommand implements CommandExecutor {
             // Usage: /link <code>
 
             if (args.length != 1) {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        plugin.getConfigManager().getInGameMessage("link.usage")));
+                String msg = plugin.getConfig().getString("messages.in-game.link.usage", "&cUsage: /link <code>");
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
                 return true;
             }
 
@@ -66,8 +86,10 @@ public class LinkCommand implements CommandExecutor {
                 String discordInfo = linkManager.getDiscordInfo(code);
 
                 if (discordInfo == null) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                            plugin.getConfigManager().getInGameMessage("link.invalid-code")));
+                    // String msg = plugin.getConfigManager().getInGameMessage("link.invalid-code");
+                    String msg = plugin.getConfig().getString("messages.in-game.link.invalid-code",
+                            "&cInvalid or expired link code.");
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
                     return;
                 }
 
@@ -82,6 +104,8 @@ public class LinkCommand implements CommandExecutor {
                 }
 
                 // Save to DB
+                // Save Logic needs to ensure UUID is unique too, mostly handled by DB
+                // constraints or getDiscordId check above
                 plugin.getDatabaseManager().saveUser(player.getUniqueId(), discordId);
 
                 // Update Cache
@@ -89,7 +113,10 @@ public class LinkCommand implements CommandExecutor {
 
                 linkManager.invalidateCode(code);
 
-                String msg = plugin.getConfigManager().getInGameMessage("link.success")
+                // String msg = plugin.getConfigManager().getInGameMessage("link.success")
+                String msg = plugin.getConfig()
+                        .getString("messages.in-game.link.success",
+                                "&aSuccessfully linked with Discord user &f%discord_user%&a!")
                         .replace("%discord_user%", username);
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
             });
@@ -98,4 +125,3 @@ public class LinkCommand implements CommandExecutor {
         return true;
     }
 }
-

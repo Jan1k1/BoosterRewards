@@ -6,7 +6,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import studio.jan1k.boosterrewards.BoosterReward;
-import studio.jan1k.boosterrewards.gui.ClaimGUI;
 
 public class ClaimCommand implements CommandExecutor {
 
@@ -24,12 +23,8 @@ public class ClaimCommand implements CommandExecutor {
         }
 
         Player player = (Player) sender;
-
-        // Open GUI
-        // The constructor handles loading data and opening inventory
-        new ClaimGUI(plugin, player);
+        new studio.jan1k.boosterrewards.gui.ClaimSelectorGUI(plugin, player);
 
         return true;
     }
 }
-

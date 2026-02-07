@@ -13,6 +13,11 @@ commands:
   unlink:
     description: Unlink your Discord account
     aliases: [logout]
+  forceunlink:
+    description: Force unlink another player's account (Admin)
+    permission: boosterrewards.admin
+    aliases: [forcelogout]
+    usage: /forceunlink <player>
   claim:
     description: Claim your booster rewards
   setboosterreward:

@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -30,32 +29,28 @@ public class ClaimGUI implements Listener, InventoryHolder {
 
     private final BoosterReward plugin;
     private final Inventory inventory;
-    private final UUID ownerId;
+    private final String tier;
     private final Map<Integer, Integer> slotToRewardId = new HashMap<>();
 
     // Constructor for Listener registration
     public ClaimGUI(BoosterReward plugin) {
         this.plugin = plugin;
         this.inventory = null;
-        this.ownerId = null;
+        this.tier = null;
     }
 
     // Constructor for opening GUI
-    public ClaimGUI(BoosterReward plugin, Player player) {
+    public ClaimGUI(BoosterReward plugin, Player player, String tier) {
         this.plugin = plugin;
-        this.ownerId = player.getUniqueId();
-        this.inventory = Bukkit.createInventory(this, 54, "Claim Rewards");
+        this.tier = tier;
+        String title = tier.equals("booster_2") ? "Claim: Tier 2" : "Claim: Tier 1";
+        this.inventory = Bukkit.createInventory(this, 54, title);
 
-        // Anti-Dupe / Safety Checks
         if (player.getGameMode() == GameMode.CREATIVE) {
             player.sendMessage(ChatColor.RED + "You cannot claim rewards in Creative mode.");
             return;
         }
 
-        // Check if player has another inventory open (Trade, etc)
-        // Opening a new inventory automatically closes the previous one in Bukkit,
-        // so we just need to ensure we don't carry over cursors/items exploits.
-        // But to be safe per user request:
         if (player.getOpenInventory().getType() != InventoryType.CRAFTING &&
                 player.getOpenInventory().getType() != InventoryType.CREATIVE) {
             player.closeInventory();
@@ -74,14 +69,26 @@ public class ClaimGUI implements Listener, InventoryHolder {
                     return;
 
                 if (rewards.isEmpty()) {
-                    player.sendMessage(ChatColor.YELLOW + "You have no pending rewards.");
+                    player.sendMessage(ChatColor.YELLOW + "You have no pending rewards for this tier.");
+                    return;
+                }
+
+                List<DatabaseManager.PendingReward> filtered = new ArrayList<>();
+                for (DatabaseManager.PendingReward reward : rewards) {
+                    if (reward.getRewardType().equals(tier)) {
+                        filtered.add(reward);
+                    }
+                }
+
+                if (filtered.isEmpty()) {
+                    player.sendMessage(ChatColor.YELLOW + "You have no pending rewards for this tier.");
                     return;
                 }
 
                 ObjectMapper mapper = new ObjectMapper();
                 int slot = 0;
 
-                for (DatabaseManager.PendingReward reward : rewards) {
+                for (DatabaseManager.PendingReward reward : filtered) {
                     if (slot >= 54)
                         break; // GUI full
 
