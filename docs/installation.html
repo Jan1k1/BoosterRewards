@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation - BoosterRewards Wiki</title>
+    <link rel="stylesheet" href="wiki.css">
+</head>
+
+<body>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="installation.html" class="active">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                        <li><a href="network-setup.html">Network Setup</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="api.html">API</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>Installation</h1>
+
+            <h2>Prerequisites</h2>
+            <ul>
+                <li>Minecraft server running Paper or Spigot 1.21.4+</li>
+                <li>Java 21 installed</li>
+                <li>Access to Discord Developer Portal</li>
+                <li>Server restart capability</li>
+            </ul>
+
+            <h2><span class="step-number">1</span> Create Discord Bot</h2>
+
+            <h3>1.1 Create Application</h3>
+            <ol>
+                <li>Go to <a href="https://discord.com/developers/applications"
+                        target="_blank">discord.com/developers/applications</a></li>
+                <li>Click <strong>New Application</strong></li>
+                <li>Enter name: "BoosterRewards Bot"</li>
+                <li>Click <strong>Create</strong></li>
+            </ol>
+
+            <h3>1.2 Create Bot User</h3>
+            <ol>
+                <li>Click <strong>Bot</strong> in left sidebar</li>
+                <li>Click <strong>Reset Token</strong></li>
+                <li>Click <strong>Yes, do it!</strong></li>
+                <li>Click <strong>Copy</strong> to copy your bot token</li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>⚠️ Warning:</strong> Never share your bot token. Treat it like a password.
+            </div>
+
+            <h3>1.3 Enable Server Members Intent</h3>
+            <p>Scroll down to <strong>Privileged Gateway Intents</strong>:</p>
+            <ol>
+                <li>Enable <strong>SERVER MEMBERS INTENT</strong> (required)</li>
+                <li>Click <strong>Save Changes</strong></li>
+            </ol>
+
+            <h3>1.4 Invite Bot to Server</h3>
+            <ol>
+                <li>Click <strong>OAuth2</strong> → <strong>URL Generator</strong></li>
+                <li>Under <strong>Scopes</strong>, select:
+                    <ul>
+                        <li><code>bot</code></li>
+                        <li><code>applications.commands</code></li>
+                    </ul>
+                </li>
+                <li>Under <strong>Bot Permissions</strong>, select:
+                    <ul>
+                        <li>Send Messages</li>
+                        <li>Embed Links</li>
+                        <li>Manage Roles (optional)</li>
+                    </ul>
+                </li>
+                <li>Copy generated URL</li>
+                <li>Open URL in browser</li>
+                <li>Select your Discord server</li>
+                <li>Click <strong>Authorize</strong></li>
+            </ol>
+
+            <h2><span class="step-number">2</span> Install Plugin</h2>
+
+            <ol>
+                <li>Download latest <code>BoosterRewards-X.X.X-Fat.jar</code> from <a
+                        href="https://github.com/jan1k1/BoosterRewards/releases">Releases</a></li>
+                <li>Place JAR in <code>plugins/</code> folder</li>
+                <li>Start your server</li>
+                <li>Wait for server to fully load</li>
+                <li>Stop your server</li>
+            </ol>
+
+            <p>The plugin creates:</p>
+            <pre><code>plugins/BoosterRewards/
+├── config.yml
+├── discord.yml
+├── messages.yml
+└── database/
+    └── boosterrewards.db</code></pre>
+
+            <h2><span class="step-number">3</span> Configure Discord Bot</h2>
+
+            <p>Edit <code>plugins/BoosterRewards/discord.yml</code>:</p>
+
+            <h3>3.1 Add Bot Token</h3>
+            <pre><code>bot:
+  token: "YOUR_BOT_TOKEN_HERE"
+  guild-id: "000000000000000000"</code></pre>
+
+            <p>Replace <code>YOUR_BOT_TOKEN_HERE</code> with token from Step 1.2</p>
+
+            <h3>3.2 Get Guild ID</h3>
+            <ol>
+                <li>Open Discord</li>
+                <li>Go to <strong>User Settings</strong> → <strong>Advanced</strong></li>
+                <li>Enable <strong>Developer Mode</strong></li>
+                <li>Right-click your server icon</li>
+                <li>Click <strong>Copy Server ID</strong></li>
+                <li>Paste into <code>guild-id</code></li>
+            </ol>
+
+            <h2><span class="step-number">4</span> Configure Rewards</h2>
+
+            <p>Edit <code>plugins/BoosterRewards/config.yml</code>:</p>
+
+            <pre><code>rewards:
+  booster:
+    enabled: true
+    on-boost:
+      - "lp user %player% parent add booster"
+      - "give %player% diamond 5"
+    on-stop:
+      - "lp user %player% parent remove booster"</code></pre>
+
+            <p>This example:</p>
+            <ul>
+                <li>Adds "booster" LuckPerms group when player boosts</li>
+                <li>Gives 5 diamonds</li>
+                <li>Removes group when boost expires</li>
+            </ul>
+
+            <p>See <a href="config.html">config.yml</a> for all configuration options.</p>
+
+            <h2><span class="step-number">5</span> Start Server</h2>
+
+            <ol>
+                <li>Start your Minecraft server</li>
+                <li>Check console for:</li>
+            </ol>
+
+            <pre><code>[BoosterRewards] Enabling BoosterRewards v0.0.1
+[BoosterRewards] Connected to Discord guild: YourServerName
+[BoosterRewards] Database initialized successfully
+[BoosterRewards] Registered 3 Discord commands</code></pre>
+
+            <div class="success-box">
+                <strong>✅ Success!</strong> If you see these messages, installation is complete.
+            </div>
+
+            <h2><span class="step-number">6</span> Verify Installation</h2>
+
+            <h3>Test Discord Bot</h3>
+            <p>In your Discord server, type <code>/</code> and verify these commands appear:</p>
+            <ul>
+                <li><code>/link</code></li>
+                <li><code>/unlink</code></li>
+                <li><code>/status</code></li>
+            </ul>
+
+            <h3>Test In-Game</h3>
+            <p>Join your server and run:</p>
+            <pre><code>/boosterrewards</code></pre>
+
+            <p>You should see the plugin help menu.</p>
+
+            <h2>Troubleshooting</h2>
+            <p>If you encounter issues:</p>
+            <ul>
+                <li><a href="troubleshooting.html#bot-not-connecting">Bot not connecting</a></li>
+                <li><a href="troubleshooting.html#commands-not-appearing">Commands not appearing</a></li>
+                <li><a href="troubleshooting.html#database-errors">Database errors</a></li>
+            </ul>
+
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="quick-start.html">Quick Start Guide</a></li>
+                <li><a href="config.html">Configure rewards and settings</a></li>
+                <li><a href="basic-setup.html">Basic setup examples</a></li>
+            </ul>
+
+            <div class="footer-nav">
+                <a href="index.html" class="prev-page">← Previous: Home</a>
+                <a href="quick-start.html" class="next-page">Next: Quick Start →</a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

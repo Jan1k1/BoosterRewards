@@ -4,353 +4,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BoosterRewards - Documentation</title>
-    <link rel="stylesheet" href="style.css">
+    <title>BoosterRewards Wiki - Home</title>
+    <link rel="stylesheet" href="wiki.css">
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="#" class="logo">BoosterRewards</a>
-            <ul class="nav-links">
-                <li><a href="#installation">Installation</a></li>
-                <li><a href="#configuration">Configuration</a></li>
-                <li><a href="#commands">Commands</a></li>
-                <li><a href="https://github.com/jan1k1/BoosterRewards" target="_blank">GitHub</a></li>
+    <div class="wiki-header">
+        <div class="header-content">
+            <h1><a href="index.html">BoosterRewards Wiki</a></h1>
+            <nav class="header-nav">
+                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+                <a href="https://discord.gg/38Ebj42e">Discord</a>
+                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul>
+                        <li><a href="index.html" class="active">Home</a></li>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="quick-start.html">Quick Start</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Configuration</h3>
+                    <ul>
+                        <li><a href="config.html">config.yml</a></li>
+                        <li><a href="discord.html">discord.yml</a></li>
+                        <li><a href="messages.html">messages.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Usage</h3>
+                    <ul>
+                        <li><a href="commands.html">Commands</a></li>
+                        <li><a href="permissions.html">Permissions</a></li>
+                        <li><a href="placeholders.html">Placeholders</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <ul>
+                        <li><a href="basic-setup.html">Basic Setup</a></li>
+                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+                        <li><a href="network-setup.html">Network Setup</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Help</h3>
+                    <ul>
+                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="api.html">API</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="wiki-content">
+            <h1>BoosterRewards</h1>
+
+            <div class="info-box">
+                <p><strong>Version:</strong> 0.0.1</p>
+                <p><strong>Minecraft:</strong> 1.21.4+ (Paper/Spigot)</p>
+                <p><strong>Java:</strong> 21+</p>
+            </div>
+
+            <h2>Overview</h2>
+            <p>BoosterRewards is a Minecraft plugin that automatically rewards Discord server boosters with in-game
+                perks. Link Minecraft accounts to Discord, automatically sync boost status, and execute custom commands
+                when players boost or stop boosting your server.</p>
+
+            <h2>Features</h2>
+            <ul>
+                <li><strong>Account Linking</strong> - Secure 6-digit code system for linking Minecraft to Discord</li>
+                <li><strong>Automatic Synchronization</strong> - Checks boost status every 5 minutes (configurable)</li>
+                <li><strong>Custom Rewards</strong> - Run any command when players boost (permissions, items, currency)
+                </li>
+                <li><strong>Automatic Revocation</strong> - Remove rewards when boost expires</li>
+                <li><strong>Multi-Tier Support</strong> - Different rewards for different boost levels</li>
+                <li><strong>Performance Optimized</strong> - Async operations, in-memory caching, zero lag</li>
+                <li><strong>Flexible Database</strong> - H2 (embedded) or MySQL/MariaDB for networks</li>
+                <li><strong>Admin GUI</strong> - Visual interface for managing rewards</li>
             </ul>
-        </div>
-    </nav>
 
-    <header class="hero">
-        <div class="container">
-            <h1>BoosterRewards Documentation</h1>
-            <p>Reward Discord server boosters with automatic in-game perks</p>
-        </div>
-    </header>
-
-    <main class="container">
-        <section id="installation" class="section">
-            <h2>Installation</h2>
-
-            <div class="step-card">
-                <h3>Step 1: Create Discord Bot</h3>
-                <ol>
-                    <li>Go to <a href="https://discord.com/developers/applications" target="_blank">Discord Developer
-                            Portal</a></li>
-                    <li>Click <strong>New Application</strong></li>
-                    <li>Go to <strong>Bot</strong> tab → <strong>Reset Token</strong></li>
-                    <li>Enable <strong>Server Members Intent</strong> under Privileged Gateway Intents</li>
-                    <li>Go to <strong>OAuth2</strong> → <strong>URL Generator</strong></li>
-                    <li>Select scopes: <code>bot</code>, <code>applications.commands</code></li>
-                    <li>Select permissions: <code>Send Messages</code>, <code>Embed Links</code></li>
-                    <li>Copy the URL and invite bot to your server</li>
-                </ol>
+            <h2>Quick Links</h2>
+            <div class="link-grid">
+                <a href="installation.html" class="link-card">
+                    <h3>Installation</h3>
+                    <p>Get started with BoosterRewards</p>
+                </a>
+                <a href="config.html" class="link-card">
+                    <h3>Configuration</h3>
+                    <p>Configure rewards and settings</p>
+                </a>
+                <a href="commands.html" class="link-card">
+                    <h3>Commands</h3>
+                    <p>View all available commands</p>
+                </a>
+                <a href="troubleshooting.html" class="link-card">
+                    <h3>Troubleshooting</h3>
+                    <p>Common issues and solutions</p>
+                </a>
             </div>
 
-            <div class="step-card">
-                <h3>Step 2: Install Plugin</h3>
-                <ol>
-                    <li>Download the latest JAR from <a href="https://github.com/jan1k1/BoosterRewards/releases"
-                            target="_blank">Releases</a></li>
-                    <li>Place in <code>plugins/</code> folder</li>
-                    <li>Start server to generate config files</li>
-                    <li>Stop server</li>
-                </ol>
-            </div>
+            <h2>Requirements</h2>
+            <ul>
+                <li>Minecraft 1.21.4+ (Paper or Spigot)</li>
+                <li>Java 21</li>
+                <li>Discord bot with Server Members Intent enabled</li>
+            </ul>
 
-            <div class="step-card">
-                <h3>Step 3: Configure</h3>
-                <p>Edit <code>plugins/BoosterRewards/discord.yml</code>:</p>
-                <pre><code>bot:
-  token: "YOUR_BOT_TOKEN_HERE"
-  guild-id: "YOUR_SERVER_ID"</code></pre>
-
-                <p>Edit <code>plugins/BoosterRewards/config.yml</code>:</p>
-                <pre><code>rewards:
-  booster:
-    enabled: true
-    on-boost:
-      - "lp user %player% parent add booster"
-      - "give %player% diamond 5"
-    on-stop:
-      - "lp user %player% parent remove booster"</code></pre>
-            </div>
-
-            <div class="step-card">
-                <h3>Step 4: Start Server</h3>
-                <p>Start your server. Check console for successful connection:</p>
-                <pre><code>[BoosterRewards] Connected to Discord guild: YourServerName</code></pre>
-            </div>
-        </section>
-
-        <section id="configuration" class="section">
-            <h2>Configuration</h2>
-
-            <div class="config-section">
-                <h3>Database Settings</h3>
-                <pre><code>database:
-  type: H2              # H2, MYSQL, or MARIADB
-  host: "localhost"
-  port: 3306
-  database: "boosterrewards"
-  username: "root"
-  password: ""
-  pool-size: 10</code></pre>
-                <p><strong>H2</strong> - File-based, no setup required (good for small servers)</p>
-                <p><strong>MySQL/MariaDB</strong> - External database (recommended for networks)</p>
-            </div>
-
-            <div class="config-section">
-                <h3>Reward Configuration</h3>
-                <pre><code>rewards:
-  booster:
-    enabled: true
-    permission: "boosterrewards.booster"
-    on-boost:
-      - "lp user %player% parent add booster"
-      - "give %player% diamond 5"
-      - "eco give %player% 1000"
-    on-stop:
-      - "lp user %player% parent remove booster"
-    cooldown: 0
-    one-time: false</code></pre>
-
-                <h4>Command Prefixes</h4>
-                <ul>
-                    <li><code>console:</code> or no prefix - Run as console</li>
-                    <li><code>player:</code> - Run as the player</li>
-                </ul>
-
-                <h4>Available Placeholders</h4>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Placeholder</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>%player%</code></td>
-                            <td>Minecraft username</td>
-                        </tr>
-                        <tr>
-                            <td><code>%uuid%</code></td>
-                            <td>Player UUID</td>
-                        </tr>
-                        <tr>
-                            <td><code>%discord_user%</code></td>
-                            <td>Discord username</td>
-                        </tr>
-                        <tr>
-                            <td><code>%discord_id%</code></td>
-                            <td>Discord user ID</td>
-                        </tr>
-                        <tr>
-                            <td><code>%boost_start%</code></td>
-                            <td>When boost started</td>
-                        </tr>
-                        <tr>
-                            <td><code>%boost_duration%</code></td>
-                            <td>How long boosting</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="config-section">
-                <h3>Sync Settings</h3>
-                <pre><code>sync:
-  interval: 300                    # Check every 5 minutes
-  remove-rewards-on-stop: true     # Auto-remove rewards
-  check-on-join: true              # Check on player join
-  verify-on-startup: true          # Sync on server start</code></pre>
-            </div>
-
-            <div class="config-section">
-                <h3>Linking Settings</h3>
-                <pre><code>linking:
-  mode: DISCORD_TO_MINECRAFT       # or MINECRAFT_TO_DISCORD
-  code-expiry: 300                 # 5 minutes
-  code-length: 6
-  allow-relink: true</code></pre>
-
-                <p><strong>DISCORD_TO_MINECRAFT:</strong> `/link` in Discord → code → `/link <code>` in Minecraft</p>
-                <p><strong>MINECRAFT_TO_DISCORD:</strong> `/link` in Minecraft → code → `/link <code>` in Discord</p>
-            </div>
-        </section>
-
-        <section id="commands" class="section">
-            <h2>Commands & Permissions</h2>
-
-            <div class="commands-section">
-                <h3>Player Commands</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Command</th>
-                            <th>Description</th>
-                            <th>Permission</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>/link &lt;code&gt;</code></td>
-                    <td>Link your account to Discord</td>
-                    <td>None</td>
-                    </tr>
-                    <tr>
-                        <td><code>/unlink</code></td>
-                        <td>Unlink your account</td>
-                        <td>None</td>
-                    </tr>
-                    <tr>
-                        <td><code>/claim</code></td>
-                        <td>Claim pending rewards</td>
-                        <td>None</td>
-                    </tr>
-                    </tbody>
-                    </table>
-
-                <h3>Admin Commands</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Command</th>
-                            <th>Description</th>
-                            <th>Permission</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>/boosterrewards</code></td>
-                            <td>Main plugin command</td>
-                            <td><code>boosterrewards.admin</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>/br reload</code></td>
-                            <td>Reload configuration</td>
-                            <td><code>boosterrewards.admin</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>/br admin</code></td>
-                            <td>Open admin GUI</td>
-                            <td><code>boosterrewards.admin</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>/forceunlink &lt;player&gt;</code></td>
-                            <td>Force unlink a player</td>
-                            <td><code>boosterrewards.admin</code></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>Discord Commands</h3>
-                <ul>
-                    <li><code>/link</code> - Get linking code</li>
-                    <li><code>/unlink</code> - Unlink account</li>
-                    <li><code>/status</code> - Check boost status</li>
-                </ul>
-            </div>
-        </section>
-
-        <section id="examples" class="section">
-            <h2>Configuration Examples</h2>
-
-            <div class="example-card">
-                <h3>Basic LuckPerms Setup</h3>
-                <pre><code>rewards:
-  booster:
-    enabled: true
-    on-boost:
-      - "lp user %player% parent add booster"
-      - "give %player% diamond 5"
-    on-stop:
-      - "lp user %player% parent remove booster"</code></pre>
-            </div>
-
-            <div class="example-card">
-                <h3>Economy Rewards</h3>
-                <pre><code>rewards:
-  booster:
-    enabled: true
-    on-boost:
-      - "eco give %player% 5000"
-      - "msg %player% &dThanks for boosting! +$5000"
-    on-stop:
-      - "eco take %player% 5000"</code></pre>
-            </div>
-
-            <div class="example-card">
-                <h3>Multi-Tier Rewards</h3>
-                <pre><code>rewards:
-  tier1:
-    enabled: true
-    on-boost:
-      - "lp user %player% parent add booster_t1"
-      - "give %player% diamond 5"
-      
-  tier2:
-    enabled: true
-    on-boost:
-      - "lp user %player% parent add booster_t2"
-      - "give %player% diamond 10"
-      - "eco give %player% 10000"</code></pre>
-            </div>
-        </section>
-
-        <section id="troubleshooting" class="section">
-            <h2>Troubleshooting</h2>
-
-            <div class="trouble-card">
-                <h3>Bot Not Connecting</h3>
-                <ul>
-                    <li>Verify bot token in <code>discord.yml</code></li>
-                    <li>Enable "Server Members Intent" in Developer Portal</li>
-                    <li>Check guild-id is correct</li>
-                    <li>Check console for errors</li>
-                </ul>
-            </div>
-
-            <div class="trouble-card">
-                <h3>Rewards Not Giving</h3>
-                <ul>
-                    <li>Enable <code>debug-mode: true</code> in config</li>
-                    <li>Test commands manually in console</li>
-                    <li>Verify player is linked with <code>/status</code> in Discord</li>
-                    <li>Check reward tier is enabled</li>
-                </ul>
-            </div>
-
-            <div class="trouble-card">
-                <h3>Link Codes Not Working</h3>
-                <ul>
-                    <li>Codes expire after 5 minutes (default)</li>
-                    <li>Verify <code>linking.mode</code> matches your workflow</li>
-                    <li>Ensure no typos (case-sensitive)</li>
-                    <li>Check bot has permission to send DMs</li>
-                </ul>
-            </div>
-        </section>
-
-        <section id="support" class="section">
             <h2>Support</h2>
-            <div class="support-links">
-                <a href="https://github.com/jan1k1/BoosterRewards/issues" target="_blank" class="support-btn">GitHub
-                    Issues</a>
-                <a href="https://discord.gg/38Ebj42e" target="_blank" class="support-btn">Discord Support</a>
-                <a href="https://github.com/jan1k1/BoosterRewards/releases" target="_blank"
-                    class="support-btn">Download</a>
-            </div>
-        </section>
-    </main>
+            <p>If you need help or want to report a bug:</p>
+            <ul>
+                <li><a href="https://github.com/jan1k1/BoosterRewards/issues">GitHub Issues</a> - Bug reports and
+                    feature requests</li>
+                <li><a href="https://discord.gg/38Ebj42e">Discord Server</a> - Community support</li>
+            </ul>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 BoosterRewards | MIT License | <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
-            </p>
-        </div>
-    </footer>
+            <div class="footer-nav">
+                <a href="installation.html" class="next-page">Next: Installation →</a>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>
