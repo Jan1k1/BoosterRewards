@@ -42,8 +42,13 @@
 # Your bot is now in your server! Paste the token below.
 # =============================================================================
 
-# bot:
-#   token: ""
+# =============================================================================
+# BOT CREDENTIALS (REQUIRED)
+# =============================================================================
+bot:
+  # Your Discord Bot Token (from step 5 above)
+  # Example: "MTIzNDU2Nzg5MDEyMzQ1Njc4.Gh1234.abcdefghijklmnopqrstuvwxyz1234567890"
+  token: "YOUR_BOT_TOKEN_HERE"
   
   # Your Discord Server (Guild) ID
   # HOW TO GET: Right-click your server icon > "Copy Server ID"
