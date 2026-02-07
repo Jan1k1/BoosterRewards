@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discord Configuration - BoosterRewards Wiki</title>
     <link rel="stylesheet" href="wiki.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 </head>
 
 <body>
@@ -75,7 +76,15 @@
 
             <p>The <code>discord.yml</code> file contains sensitive information for connecting to your Discord bot.</p>
 
-            <pre><code># =============================================================================
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <div class="code-title">discord.yml</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml"># =============================================================================
 #    ____                   _            _____ZX______
 #   |  _ \                 | |          |  __ \ZX_____\
 #   | |_) | ___   ___  ___ | |_ ___ _ __| |__) |_____
@@ -194,6 +203,7 @@ commands:
   status:
     enabled: true
     description: "Check your boost status and rewards"</code></pre>
+            </div>
 
             <div class="footer-nav">
                 <a href="config.html" class="prev-page">← Previous: config.yml</a>
@@ -201,6 +211,19 @@ commands:
             </div>
         </main>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script>
+        function copyCode(btn) {
+            const pre = btn.closest('.code-window').querySelector('pre');
+            const code = pre.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = originalText, 2000);
+            });
+        }
+    </script>
 </body>
 
 </html>

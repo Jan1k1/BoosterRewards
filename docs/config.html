@@ -2,81 +2,90 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuration - BoosterRewards Wiki</title>
-    <link rel="stylesheet" href="wiki.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration - BoosterRewards Wiki</title>
+  <link rel="stylesheet" href="wiki.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 </head>
 
 <body>
-    <div class="wiki-header">
-        <div class="header-content">
-            <h1>BoosterRewards Wiki</h1>
-            <nav class="header-nav">
-                <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
-                <a href="https://discord.gg/38Ebj42e">Discord</a>
-                <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
-                <a href="https://github.com/jan1k1.png" style="padding: 0;"><img src="https://github.com/jan1k1.png"
-                        style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;"></a>
-            </nav>
-        </div>
+  <div class="wiki-header">
+    <div class="header-content">
+      <h1>BoosterRewards Wiki</h1>
+      <nav class="header-nav">
+        <a href="https://github.com/jan1k1/BoosterRewards">GitHub</a>
+        <a href="https://discord.gg/38Ebj42e">Discord</a>
+        <a href="https://github.com/jan1k1/BoosterRewards/releases">Download</a>
+        <a href="https://github.com/jan1k1.png" style="padding: 0;"><img src="https://github.com/jan1k1.png"
+            style="width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;"></a>
+      </nav>
     </div>
+  </div>
 
-    <div class="wiki-container">
-        <aside class="wiki-sidebar">
-            <nav>
-                <div class="nav-section">
-                    <h3>Getting Started</h3>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="installation.html">Installation</a></li>
-                        <li><a href="quick-start.html">Quick Start</a></li>
-                    </ul>
-                </div>
+  <div class="wiki-container">
+    <aside class="wiki-sidebar">
+      <nav>
+        <div class="nav-section">
+          <h3>Getting Started</h3>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="installation.html">Installation</a></li>
+            <li><a href="quick-start.html">Quick Start</a></li>
+          </ul>
+        </div>
 
-                <div class="nav-section">
-                    <h3>Configuration</h3>
-                    <ul>
-                        <li><a href="config.html" class="active">config.yml</a></li>
-                        <li><a href="discord.html">discord.yml</a></li>
-                        <li><a href="messages.html">messages.yml</a></li>
-                    </ul>
-                </div>
+        <div class="nav-section">
+          <h3>Configuration</h3>
+          <ul>
+            <li><a href="config.html" class="active">config.yml</a></li>
+            <li><a href="discord.html">discord.yml</a></li>
+            <li><a href="messages.html">messages.yml</a></li>
+          </ul>
+        </div>
 
-                <div class="nav-section">
-                    <h3>Usage</h3>
-                    <ul>
-                        <li><a href="commands.html">Commands</a></li>
-                        <li><a href="permissions.html">Permissions</a></li>
-                        <li><a href="placeholders.html">Placeholders</a></li>
-                    </ul>
-                </div>
+        <div class="nav-section">
+          <h3>Usage</h3>
+          <ul>
+            <li><a href="commands.html">Commands</a></li>
+            <li><a href="permissions.html">Permissions</a></li>
+            <li><a href="placeholders.html">Placeholders</a></li>
+          </ul>
+        </div>
 
-                <div class="nav-section">
-                    <h3>Examples</h3>
-                    <ul>
-                        <li><a href="basic-setup.html">Basic Setup</a></li>
-                        <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
-                    </ul>
-                </div>
+        <div class="nav-section">
+          <h3>Examples</h3>
+          <ul>
+            <li><a href="basic-setup.html">Basic Setup</a></li>
+            <li><a href="advanced-rewards.html">Advanced Rewards</a></li>
+          </ul>
+        </div>
 
-                <div class="nav-section">
-                    <h3>Help</h3>
-                    <ul>
-                        <li><a href="troubleshooting.html">Troubleshooting</a></li>
-                        <li><a href="faq.html">FAQ</a></li>
-                    </ul>
-                </div>
-            </nav>
-        </aside>
+        <div class="nav-section">
+          <h3>Help</h3>
+          <ul>
+            <li><a href="troubleshooting.html">Troubleshooting</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
 
-        <main class="wiki-content">
-            <h1>Configuration (config.yml)</h1>
+    <main class="wiki-content">
+      <h1>Configuration (config.yml)</h1>
 
-            <p>The <code>config.yml</code> file controls the core behavior of the plugin, including database settings,
-                reward definitions, and synchronization timings.</p>
+      <p>The <code>config.yml</code> file controls the core behavior of the plugin, including database settings,
+        reward definitions, and synchronization timings.</p>
 
-            <pre><code># =============================================================================
+      <div class="code-window">
+        <div class="code-header">
+          <div class="dot red"></div>
+          <div class="dot yellow"></div>
+          <div class="dot green"></div>
+          <div class="code-title">config.yml</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-yaml"># =============================================================================
 #    ____                   _            _____ZX______
 #   |  _ \                 | |          |  __ \ZX_____\
 #   | |_) | ___   ___  ___ | |_ ___ _ __| |__) |_____
@@ -328,13 +337,27 @@ panel:
   
   # How often to update the panel (in seconds)
   update-interval: 60</code></pre>
+      </div>
 
-            <div class="footer-nav">
-                <a href="installation.html" class="prev-page">← Previous: Installation</a>
-                <a href="discord.html" class="next-page">Next: discord.yml →</a>
-            </div>
-        </main>
-    </div>
+      <div class="footer-nav">
+        <a href="installation.html" class="prev-page">← Previous: Installation</a>
+        <a href="discord.html" class="next-page">Next: discord.yml →</a>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script>
+    function copyCode(btn) {
+      const pre = btn.closest('.code-window').querySelector('pre');
+      const code = pre.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => btn.innerText = originalText, 2000);
+      });
+    }
+  </script>
 </body>
 
 </html>
