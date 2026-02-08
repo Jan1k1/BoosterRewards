@@ -207,12 +207,14 @@ public class AdminGUI implements Listener, InventoryHolder {
         List<ItemStack> list = new ArrayList<>();
         for (ItemStack item : inv.getContents()) {
             if (item != null && item.getType() != Material.AIR) {
-                list.add(item);
+                list.add(item.clone());
             }
         }
-        plugin.getConfig().set(path, list);
-        plugin.saveConfig();
-        // Update cache immediately
-        plugin.getItemRewardHandler().refreshCache();
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            plugin.getConfig().set(path, list);
+            plugin.saveConfig();
+            // Update cache immediately
+            plugin.getItemRewardHandler().refreshCache();
+        });
     }
 }

@@ -33,7 +33,7 @@ public class DiscordBot extends ListenerAdapter {
     public DiscordBot(BoosterReward plugin, LinkManager linkManager) {
         this.plugin = plugin;
         this.linkManager = linkManager;
-        startBot();
+        org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, this::startBot);
     }
 
     private void startBot() {

@@ -33,40 +33,42 @@ public class LinkCommand implements CommandExecutor {
         Player player = (Player) sender;
         String mode = plugin.getConfig().getString("linking.mode", "MINECRAFT_TO_DISCORD");
 
-        if (plugin.getDatabaseManager().getDiscordId(player.getUniqueId()) != null) {
-            String msg = plugin.getConfig().getString("messages.in-game.link.already-linked",
-                    "&cYou are already linked! Use /logout to unlink.");
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
-            return true;
-        }
-
         if (mode.equalsIgnoreCase("MINECRAFT_TO_DISCORD")) {
             // Mode: MC -> Discord
             // Usage: /link (generates code)
 
-            if (args.length != 0) {
-                player.sendMessage(ChatColor.RED + "Usage: /link");
-                player.sendMessage(ChatColor.GRAY + "This generates a code to use in Discord.");
-                return true;
-            }
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                if (plugin.getDatabaseManager().getDiscordId(player.getUniqueId()) != null) {
+                    String msg = plugin.getConfig().getString("messages.in-game.link.already-linked",
+                            "&cYou are already linked! Use /logout to unlink.");
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
+                    return;
+                }
 
-            String code = plugin.getLinkManager().generateMinecraftCode(player.getUniqueId(), player.getName());
+                if (args.length != 0) {
+                    player.sendMessage(ChatColor.RED + "Usage: /link");
+                    player.sendMessage(ChatColor.GRAY + "This generates a code to use in Discord.");
+                    return;
+                }
 
-            TextComponent message = new TextComponent("Your link code is: ");
-            message.setColor(net.md_5.bungee.api.ChatColor.GREEN);
+                String code = plugin.getLinkManager().generateMinecraftCode(player.getUniqueId(), player.getName());
 
-            TextComponent codeComponent = new TextComponent(code);
-            codeComponent.setColor(net.md_5.bungee.api.ChatColor.AQUA);
-            codeComponent.setBold(true);
-            codeComponent.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
-            codeComponent.setHoverEvent(
-                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to copy").create()));
+                TextComponent message = new TextComponent("Your link code is: ");
+                message.setColor(net.md_5.bungee.api.ChatColor.GREEN);
 
-            message.addExtra(codeComponent);
+                TextComponent codeComponent = new TextComponent(code);
+                codeComponent.setColor(net.md_5.bungee.api.ChatColor.AQUA);
+                codeComponent.setBold(true);
+                codeComponent.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
+                codeComponent.setHoverEvent(
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to copy").create()));
 
-            player.spigot().sendMessage(message);
-            player.sendMessage(ChatColor.GRAY + "Run " + ChatColor.YELLOW + "/link " + code + ChatColor.GRAY
-                    + " in our Discord server.");
+                message.addExtra(codeComponent);
+
+                player.spigot().sendMessage(message);
+                player.sendMessage(ChatColor.GRAY + "Run " + ChatColor.YELLOW + "/link " + code + ChatColor.GRAY
+                        + " in our Discord server.");
+            });
 
         } else {
             // Mode: Discord -> MC
@@ -82,6 +84,13 @@ public class LinkCommand implements CommandExecutor {
 
             // Run everything else ASYNC to prevent main-thread lag
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                if (plugin.getDatabaseManager().getDiscordId(player.getUniqueId()) != null) {
+                    String msg = plugin.getConfig().getString("messages.in-game.link.already-linked",
+                            "&cYou are already linked! Use /logout to unlink.");
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
+                    return;
+                }
+
                 LinkManager linkManager = plugin.getLinkManager();
                 String discordInfo = linkManager.getDiscordInfo(code);
 

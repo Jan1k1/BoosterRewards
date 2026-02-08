@@ -1,5 +1,6 @@
 package studio.jan1k.boosterrewards.core;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -73,17 +74,20 @@ public class ItemRewardHandler {
         if (items.isEmpty())
             return;
 
-        for (ItemStack item : items) {
-            try {
-                Map<String, Object> itemMap = ItemSerializer.serialize(item);
-                plugin.getDatabaseManager().addPendingReward(
-                        player.getUniqueId(),
-                        mapper.writeValueAsString(itemMap),
-                        tier);
-            } catch (Exception e) {
-                Logs.error("Failed to queue reward item for " + player.getName() + ": " + e.getMessage());
+        UUID uuid = player.getUniqueId();
+        String playerName = player.getName();
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            for (ItemStack item : items) {
+                try {
+                    Map<String, Object> itemMap = ItemSerializer.serialize(item);
+                    String json = mapper.writeValueAsString(itemMap);
+                    plugin.getDatabaseManager().addPendingReward(uuid, json, tier);
+                } catch (Exception e) {
+                    Logs.error("Failed to queue reward item for " + playerName + ": " + e.getMessage());
+                }
             }
-        }
+        });
     }
 
     public void giveItemRewards(Player player, String tier) {
