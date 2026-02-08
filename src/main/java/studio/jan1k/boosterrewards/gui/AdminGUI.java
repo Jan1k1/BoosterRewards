@@ -181,9 +181,9 @@ public class AdminGUI implements Listener, InventoryHolder {
                 }
             } else if (gui.mode == GuiMode.REWARD_SELECTOR) {
                 if (slot == 11) { // Tier 1
-                    new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster.on-boost.items").open(player);
+                    new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster.items").open(player);
                 } else if (slot == 15) { // Tier 2
-                    new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster_2.on-boost.items").open(player);
+                    new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster_2.items").open(player);
                 } else if (slot == 22) { // Back
                     new AdminGUI(plugin).open(player);
                 }

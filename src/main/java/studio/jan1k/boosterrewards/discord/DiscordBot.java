@@ -3,7 +3,6 @@ package studio.jan1k.boosterrewards.discord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateBoostTimeEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -66,13 +65,10 @@ public class DiscordBot extends ListenerAdapter {
 
         Guild guild = jda.getGuildById(guildId);
         if (guild != null) {
-            String mode = plugin.getConfig().getString("linking.mode", "MINECRAFT_TO_DISCORD");
-            boolean codeRequired = mode.equalsIgnoreCase("MINECRAFT_TO_DISCORD");
-
             guild.updateCommands().addCommands(
                     Commands.slash("link", "Link your Minecraft account")
                             .addOption(OptionType.STRING, "code",
-                                    "The link code from Minecraft", codeRequired),
+                                    "The link code from Minecraft", false),
                     Commands.slash("unlink", "Unlink your Minecraft account"),
                     Commands.slash("status", "Check your boost status")).queue();
         }
@@ -126,29 +122,8 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     private void announceBoost(Member member, UUID uuid) {
-        String mcName = org.bukkit.Bukkit.getOfflinePlayer(uuid).getName();
-        String discordName = member.getEffectiveName();
-
-        // 1. Announce to Discord
-        String channelId = plugin.getConfig().getString("announcements.discord.channel-id");
-        if (channelId != null && !channelId.isEmpty() && !channelId.equals("000000000000000000")) {
-            TextChannel channel = jda.getTextChannelById(channelId);
-            if (channel != null) {
-                String msg = plugin.getConfig().getString("announcements.discord.message",
-                        "🌟 **%player%** just boosted the server!")
-                        .replace("%player%", discordName)
-                        .replace("%mc_name%", mcName != null ? mcName : "Unknown");
-                channel.sendMessage(msg).queue();
-            }
-        }
-
-        // 2. Announce to Minecraft
-        String mcMsg = plugin.getConfig().getString("announcements.minecraft.message",
-                "&d&lBooster &8» &f%player% &7just boosted the server! &d❤")
-                .replace("%player%", mcName != null ? mcName : discordName)
-                .replace("%discord_name%", discordName);
-
-        org.bukkit.Bukkit.broadcastMessage(org.bukkit.ChatColor.translateAlternateColorCodes('&', mcMsg));
+        // Boost announcements are handled by RewardManager/Commands now if enabled,
+        // or disabled as per user request to remove specific channels.
     }
 
     @Override
@@ -187,8 +162,8 @@ public class DiscordBot extends ListenerAdapter {
 
         if (mode.equalsIgnoreCase("DISCORD_TO_MINECRAFT")) {
             String code = linkManager.generateCode(discordId, username);
-            event.reply("✅ **Your Link Code:** `" + code + "`\n\n" +
-                    "🎮 Join the Minecraft server and type:\n" +
+            event.reply("**Your Link Code:** `" + code + "`\n\n" +
+                    "Join the Minecraft server and type:\n" +
                     "`/link " + code + "`")
                     .setEphemeral(true)
                     .queue();
@@ -221,7 +196,6 @@ public class DiscordBot extends ListenerAdapter {
 
         String code = event.getValue("link_code").getAsString().toUpperCase();
         String discordId = event.getUser().getId();
-        String username = event.getUser().getName();
 
         if (plugin.getDatabaseManager().getUuid(discordId) != null) {
             event.reply("❌ You are already linked to a Minecraft account!")
@@ -232,7 +206,7 @@ public class DiscordBot extends ListenerAdapter {
 
         String info = linkManager.getInfo(code);
         if (info == null) {
-            event.reply("❌ Invalid or expired code. Please generate a new one in-game.")
+            event.reply("Invalid or expired code. Please generate a new one in-game.")
                     .setEphemeral(true)
                     .queue();
             return;
@@ -248,57 +222,20 @@ public class DiscordBot extends ListenerAdapter {
             plugin.cachePlayer(uuid, discordId);
             linkManager.invalidateCode(code);
 
-            // Role assignment logic (extracted duplicated code)
-            assignLinkedRole(event.getGuild(), discordId, username);
-
-            event.reply("✅ Successfully linked to Minecraft player **" + mcName + "**!")
+            event.reply("Successfully linked to Minecraft player **" + mcName + "**!")
                     .setEphemeral(true)
                     .queue();
 
             org.bukkit.entity.Player player = org.bukkit.Bukkit.getPlayer(uuid);
             if (player != null) {
                 player.sendMessage(org.bukkit.ChatColor.GREEN + "✓ Your Discord account has been linked!");
+                // Trigger immediate boost check
+                handleBoostUpdate(event.getGuild().getMemberById(discordId));
             }
         } else {
-            event.reply("❌ Invalid code type. Please use the code generated in Minecraft.")
+            event.reply("Invalid code type. Please use the code generated in Minecraft.")
                     .setEphemeral(true)
                     .queue();
-        }
-    }
-
-    private void assignLinkedRole(Guild guild, String discordId, String username) {
-        String roleId = plugin.getConfig().getString("roles.linked-role-id");
-        Logs.info("[Role Assignment] Attempting to assign role. Role ID from config: " + roleId);
-
-        if (roleId != null && !roleId.equals("000000000000000000")) {
-            Logs.info("[Role Assignment] Guild: " + (guild != null ? guild.getName() : "NULL"));
-
-            if (guild != null) {
-                net.dv8tion.jda.api.entities.Role role = guild.getRoleById(roleId);
-                Logs.info("[Role Assignment] Role found: " + (role != null ? role.getName() : "NULL"));
-
-                if (role != null) {
-                    Logs.info("[Role Assignment] Retrieving member for Discord ID: " + discordId);
-                    guild.retrieveMemberById(discordId).queue(
-                            member -> {
-                                Logs.info("[Role Assignment] Member retrieved: " + member.getEffectiveName());
-                                guild.addRoleToMember(member, role).queue(
-                                        success -> Logs.info("[Role Assignment] ✓ Successfully assigned role '"
-                                                + role.getName() + "' to " + username),
-                                        error -> Logs.error(
-                                                "[Role Assignment] ✗ Failed to assign role: " + error.getMessage()));
-                            },
-                            error -> Logs
-                                    .error("[Role Assignment] ✗ Could not retrieve member: " + error.getMessage()));
-                } else {
-                    Logs.warn(
-                            "[Role Assignment] Role ID '" + roleId + "' not found in guild '" + guild.getName() + "'");
-                }
-            } else {
-                Logs.warn("[Role Assignment] Guild is null - cannot assign role");
-            }
-        } else {
-            Logs.info("[Role Assignment] Skipped - role ID not configured or set to default");
         }
     }
 
@@ -329,7 +266,7 @@ public class DiscordBot extends ListenerAdapter {
 
             String info = linkManager.getInfo(code);
             if (info == null || !info.startsWith("MINECRAFT:")) {
-                event.reply("❌ Invalid or expired code. Please generate a new one in Minecraft.")
+                event.reply("Invalid or expired code. Please generate a new one in Minecraft.")
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -344,43 +281,7 @@ public class DiscordBot extends ListenerAdapter {
             plugin.cachePlayer(uuid, discordId);
             linkManager.invalidateCode(code);
 
-            // Assign Linked Role
-            String roleId = plugin.getConfig().getString("roles.linked-role-id");
-            Logs.info("[Role Assignment] Attempting to assign role. Role ID from config: " + roleId);
-
-            if (roleId != null && !roleId.equals("000000000000000000")) {
-                Guild guild = event.getGuild();
-                Logs.info("[Role Assignment] Guild: " + (guild != null ? guild.getName() : "NULL"));
-
-                if (guild != null) {
-                    net.dv8tion.jda.api.entities.Role role = guild.getRoleById(roleId);
-                    Logs.info("[Role Assignment] Role found: " + (role != null ? role.getName() : "NULL"));
-
-                    if (role != null) {
-                        Logs.info("[Role Assignment] Retrieving member for Discord ID: " + discordId);
-                        guild.retrieveMemberById(discordId).queue(
-                                member -> {
-                                    Logs.info("[Role Assignment] Member retrieved: " + member.getEffectiveName());
-                                    guild.addRoleToMember(member, role).queue(
-                                            success -> Logs.info("[Role Assignment] ✓ Successfully assigned role '"
-                                                    + role.getName() + "' to " + username),
-                                            error -> Logs.error("[Role Assignment] ✗ Failed to assign role: "
-                                                    + error.getMessage()));
-                                },
-                                error -> Logs
-                                        .error("[Role Assignment] ✗ Could not retrieve member: " + error.getMessage()));
-                    } else {
-                        Logs.warn("[Role Assignment] Role ID '" + roleId + "' not found in guild '" + guild.getName()
-                                + "'");
-                    }
-                } else {
-                    Logs.warn("[Role Assignment] Guild is null - cannot assign role");
-                }
-            } else {
-                Logs.info("[Role Assignment] Skipped - role ID not configured or set to default");
-            }
-
-            event.reply("✅ Successfully linked to Minecraft player **" + mcName + "**!")
+            event.reply("Successfully linked to Minecraft player **" + mcName + "**!")
                     .setEphemeral(true)
                     .queue();
 
@@ -401,7 +302,7 @@ public class DiscordBot extends ListenerAdapter {
         UUID uuid = plugin.getDatabaseManager().getUuid(discordId);
 
         if (uuid == null) {
-            event.reply("❌ You are not linked to any Minecraft account.")
+            event.reply("You are not linked to any Minecraft account.")
                     .setEphemeral(true)
                     .queue();
             return;
@@ -410,7 +311,7 @@ public class DiscordBot extends ListenerAdapter {
         plugin.getDatabaseManager().removeUser(uuid);
         plugin.removeCachedPlayer(uuid);
 
-        event.reply("✅ Successfully unlinked your account.")
+        event.reply("Successfully unlinked your account.")
                 .setEphemeral(true)
                 .queue();
     }
@@ -420,7 +321,7 @@ public class DiscordBot extends ListenerAdapter {
         UUID uuid = plugin.getDatabaseManager().getUuid(discordId);
 
         if (uuid == null) {
-            event.reply("❌ Your account is not linked. Use `/link` to connect.")
+            event.reply("Your account is not linked. Use `/link` to connect.")
                     .setEphemeral(true)
                     .queue();
             return;
@@ -432,14 +333,14 @@ public class DiscordBot extends ListenerAdapter {
 
         guild.retrieveMemberById(discordId).queue(member -> {
             boolean isBoosting = member.getTimeBoosted() != null;
-            String statusValue = isBoosting ? "💎 Boosting" : "❌ Not Boosting";
-            event.reply("🔍 **BoosterRewards Status**\n" +
-                    "• Link: ✅ Connected\n" +
+            String statusValue = isBoosting ? "Boosting" : "Not Boosting";
+            event.reply("**BoosterRewards Status**\n" +
+                    "• Link: Connected\n" +
                     "• Status: " + statusValue)
                     .setEphemeral(true)
                     .queue();
         }, throwable -> {
-            event.reply("❌ Could not retrieve your member data.")
+            event.reply("Could not retrieve your member data.")
                     .setEphemeral(true)
                     .queue();
         });

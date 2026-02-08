@@ -5,7 +5,7 @@
 # Color codes: Use & for colors, &#RRGGBB for hex colors
 # =============================================================================
 
-prefix: "&#E354FF&lɴɪᴛʀᴏ &#54A5FF&lʀᴇᴡᴀʀᴅs &8» &7"
+prefix: "&d&lNITRO &b&lREWARDS &8» &7"
 
 # =============================================================================
 # IN-GAME MESSAGES
@@ -45,32 +45,35 @@ in-game:
 discord:
   link:
     command-description: "Link your Minecraft account to Discord"
-    success-title: "🔗 Account Linked!"
-    success-description: "Your linking code is: **%code%**\n\nType `/link %code%` in Minecraft to complete the process.\n\n⏰ This code expires in 5 minutes."
-    already-linked-title: "⚠️ Already Linked"
+    success-title: "Account Linked!"
+    success-description: "Your linking code is: **%code%**\n\nType `/link %code%` in Minecraft to complete the process.\n\nThis code expires in 5 minutes."
+    already-linked-title: "Already Linked"
     already-linked-description: "You are already linked to Minecraft account: **%player%**"
     
   unlink:
     command-description: "Unlink your Minecraft account"
-    success-title: "🔓 Account Unlinked"
+    success-title: "Account Unlinked"
     success-description: "Your Minecraft account has been unlinked."
-    not-linked-title: "⚠️ Not Linked"
+    not-linked-title: "Not Linked"
     not-linked-description: "You are not linked to any Minecraft account."
     
   status:
     command-description: "Check your boost status"
-    title: "📊 Boost Status"
+    title: "Boost Status"
     linked-description: "**Minecraft:** %player%\n**Boosting:** %boosting%\n**Since:** %boost_start%"
     not-linked-description: "You are not linked to any Minecraft account."
+    checking: "Checking boost status..."
+    is-booster: "Status: Boosting"
+    not-booster: "Status: Not Boosting"
     
   boost:
-    not-booster-title: "❌ Not a Booster"
+    not-booster-title: "Not a Booster"
     not-booster-description: "You must be a Server Booster to claim rewards!"
     
   announcements:
-    new-boost-title: "🚀 New Booster!"
+    new-boost-title: "New Booster!"
     new-boost-description: "**%discord_user%** just boosted the server!\nThey are linked to: **%player%**"
-    boost-ended-title: "💔 Boost Ended"
+    boost-ended-title: "Boost Ended"
     boost-ended-description: "**%discord_user%** is no longer boosting."
 
 # =============================================================================
@@ -97,14 +100,14 @@ embeds:
 # =============================================================================
 panel:
   embed:
-    title: "🎮 Link Your Minecraft Account"
-    description: "Click the button below to link your Minecraft account and claim your booster rewards!\n\n**Requirements:**\n• Must be a Server Booster\n• Minecraft account not already linked"
+    title: "Link Your Minecraft Account"
+    description: "Click the button below to link your Minecraft account and claim your booster rewards!"
     color: "#E354FF"
     thumbnail: ""
     image: ""
-    footer-text: "boosterrewards"
+    footer: "BoosterRewards"
   button:
-    label: "🔗 Link Account"
+    label: "Link Account"
     style: "PRIMARY"
 
 # =============================================================================

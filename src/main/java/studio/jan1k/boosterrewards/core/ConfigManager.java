@@ -61,14 +61,6 @@ public class ConfigManager {
         return discordConfig.getString("bot.guild-id", "000000000000000000");
     }
 
-    public String getBoosterRoleId() {
-        return discordConfig.getString("roles.booster-role-id", "000000000000000000");
-    }
-
-    public String getLinkedRoleId() {
-        return discordConfig.getString("roles.linked-role-id", "000000000000000000");
-    }
-
     public String getBoostAnnouncementsChannel() {
         return discordConfig.getString("channels.boost-announcements", "000000000000000000");
     }
@@ -105,4 +97,3 @@ public class ConfigManager {
         return messagesConfig;
     }
 }
-

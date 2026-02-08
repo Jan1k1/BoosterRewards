@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import me.clip.placeholderapi.PlaceholderAPI;
 import studio.jan1k.boosterrewards.BoosterReward;
-import studio.jan1k.boosterrewards.utils.Logs;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +18,11 @@ public class RewardManager {
 
     public void giveReward(UUID uuid, String tier) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            // Check if player already has rewards of this tier pending
+            if (plugin.getDatabaseManager().hasPendingReward(uuid, tier)) {
+                return;
+            }
+
             List<String> commands = plugin.getConfig().getStringList("rewards." + tier + ".on-boost");
             String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
 
@@ -33,8 +37,8 @@ public class RewardManager {
                     executeCommand(player, cmd, discordId);
                 }
 
-                // 2. Give Custom Items
-                plugin.getItemRewardHandler().giveItemRewards(player, tier);
+                // 2. Queue Custom Items as pending rewards
+                plugin.getItemRewardHandler().queueItemRewards(player, tier);
             });
         });
     }

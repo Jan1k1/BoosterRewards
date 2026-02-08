@@ -14,15 +14,20 @@ import org.bukkit.inventory.meta.ItemMeta;
 import studio.jan1k.boosterrewards.BoosterReward;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 public class ClaimSelectorGUI implements Listener, InventoryHolder {
 
     private final BoosterReward plugin;
     private final Inventory inventory;
+    private final int boostCount;
 
     public ClaimSelectorGUI(BoosterReward plugin, Player player) {
+        this(plugin, player, plugin.getDatabaseManager().getBoostCount(player.getUniqueId()));
+    }
+
+    public ClaimSelectorGUI(BoosterReward plugin, Player player, int boostCount) {
         this.plugin = plugin;
+        this.boostCount = boostCount;
         this.inventory = player != null ? Bukkit.createInventory(this, 27, "Select Reward Tier") : null;
 
         if (player != null) {
@@ -40,9 +45,17 @@ public class ClaimSelectorGUI implements Listener, InventoryHolder {
             inventory.setItem(i, filler);
         }
 
-        int boostCount = plugin.getDatabaseManager().getBoostCount(player.getUniqueId());
+        boolean tier2Enabled = plugin.getConfig().getBoolean("rewards.booster_2.enabled", false);
 
-        // Tier 1: Standard Booster
+        if (tier2Enabled) {
+            addTier1(boostCount, 11);
+            addTier2(boostCount, 15);
+        } else {
+            addTier1(boostCount, 13);
+        }
+    }
+
+    private void addTier1(int boostCount, int slot) {
         ItemStack tier1 = new ItemStack(Material.EMERALD);
         ItemMeta m1 = tier1.getItemMeta();
         m1.setDisplayName(ChatColor.GREEN + "Booster Tier 1");
@@ -51,24 +64,20 @@ public class ClaimSelectorGUI implements Listener, InventoryHolder {
                 ChatColor.GRAY + "Status: "
                         + (boostCount >= 1 ? ChatColor.GREEN + "Unlocked" : ChatColor.RED + "Locked")));
         tier1.setItemMeta(m1);
-        inventory.setItem(11, tier1);
+        inventory.setItem(slot, tier1);
+    }
 
-        // Tier 2: Double Booster (VIP)
-        ItemStack tier2;
+    private void addTier2(int boostCount, int slot) {
         boolean hasTier2 = boostCount >= 2;
-        boolean tier2Enabled = plugin.getConfig().getBoolean("rewards.booster_2.enabled", false);
-
-        if (tier2Enabled) {
-            tier2 = new ItemStack(hasTier2 ? Material.NETHER_STAR : Material.BARRIER);
-            ItemMeta m2 = tier2.getItemMeta();
-            m2.setDisplayName(ChatColor.LIGHT_PURPLE + "Booster Tier 2 (VIP)");
-            m2.setLore(Arrays.asList(
-                    ChatColor.GRAY + "Double Booster (2x Boost)",
-                    ChatColor.GRAY + "Status: "
-                            + (hasTier2 ? ChatColor.GREEN + "Unlocked" : ChatColor.RED + "Requires 2 boosts")));
-            tier2.setItemMeta(m2);
-            inventory.setItem(15, tier2);
-        }
+        ItemStack tier2 = new ItemStack(hasTier2 ? Material.NETHER_STAR : Material.BARRIER);
+        ItemMeta m2 = tier2.getItemMeta();
+        m2.setDisplayName(ChatColor.LIGHT_PURPLE + "Booster Tier 2 (VIP)");
+        m2.setLore(Arrays.asList(
+                ChatColor.GRAY + "Double Booster (2x Boost)",
+                ChatColor.GRAY + "Status: "
+                        + (hasTier2 ? ChatColor.GREEN + "Unlocked" : ChatColor.RED + "Requires 2 boosts")));
+        tier2.setItemMeta(m2);
+        inventory.setItem(slot, tier2);
     }
 
     @Override
@@ -87,18 +96,20 @@ public class ClaimSelectorGUI implements Listener, InventoryHolder {
             return;
 
         Player player = (Player) event.getWhoClicked();
-        int slot = event.getSlot();
+        ItemStack item = event.getCurrentItem();
+        if (item == null || item.getItemMeta() == null)
+            return;
 
-        int boostCount = plugin.getDatabaseManager().getBoostCount(player.getUniqueId());
+        String name = item.getItemMeta().getDisplayName();
 
-        if (slot == 11) { // Tier 1
+        if (name.contains("Booster Tier 1")) {
             if (boostCount >= 1) {
                 player.closeInventory();
                 new ClaimGUI(plugin, player, "booster");
             } else {
                 player.sendMessage(ChatColor.RED + "You need at least 1 boost to claim this tier!");
             }
-        } else if (slot == 15) { // Tier 2
+        } else if (name.contains("Booster Tier 2")) {
             if (boostCount >= 2) {
                 player.closeInventory();
                 new ClaimGUI(plugin, player, "booster_2");

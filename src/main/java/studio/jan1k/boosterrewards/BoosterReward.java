@@ -1,5 +1,6 @@
 package studio.jan1k.boosterrewards;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.UUID;
 import studio.jan1k.boosterrewards.core.PlayerData;
@@ -52,65 +53,41 @@ public class BoosterReward extends JavaPlugin {
         saveDefaultConfig();
         configManager.loadFullConfigs();
 
+        loadCoreModules();
+
         String discordToken = configManager.getDiscordToken();
         if (discordToken == null || discordToken.equals("YOUR_BOT_TOKEN_HERE") || discordToken.isEmpty()) {
-            printLicenseError("DISCORD BOT TOKEN REQUIRED",
-                    "A Discord bot token is required to run this plugin.",
-                    "Please configure your bot token in discord.yml");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
+            Logs.warn("Discord Bot Token is not configured. Discord features will be disabled.");
+            Logs.warn("Please set your bot token in discord.yml and reload.");
+        } else {
+            String guildId = configManager.getDiscordGuildId();
+            if (guildId == null || guildId.equals("000000000000000000") || guildId.isEmpty()) {
+                Logs.warn("Discord Guild ID is not configured. Discord features will be disabled.");
+                Logs.warn("Please set your guild-id in discord.yml and reload.");
+            } else {
+                this.discordBot = new DiscordBot(this, linkManager);
+            }
         }
-
-        String guildId = configManager.getDiscordGuildId();
-        if (guildId == null || guildId.equals("000000000000000000") || guildId.isEmpty()) {
-            printLicenseError("DISCORD GUILD ID REQUIRED",
-                    "A Target Discord Server ID is required.",
-                    "Please configure your guild-id in discord.yml");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        loadModules();
     }
 
     private void suppressLibraryLogs() {
-        // JUL silencing (for JDA and others)
         java.util.logging.Logger.getLogger("net.dv8tion.jda").setLevel(java.util.logging.Level.OFF);
         java.util.logging.Logger.getLogger("com.zaxxer.hikari").setLevel(java.util.logging.Level.OFF);
         java.util.logging.Logger.getLogger("org.h2").setLevel(java.util.logging.Level.OFF);
 
-        // System properties for slf4j-simple (since we bundle it)
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "warn");
         System.setProperty("org.slf4j.simpleLogger.log.net.dv8tion.jda", "warn");
         System.setProperty("org.slf4j.simpleLogger.log.com.zaxxer.hikari", "warn");
     }
 
-    private void loadModules() {
-        Logs.info("Initializing modules...");
+    private void loadCoreModules() {
+        Logs.info("Initializing core modules...");
         this.databaseManager = new DatabaseManager(this);
         this.linkManager = new LinkManager();
         this.itemRewardHandler = new studio.jan1k.boosterrewards.core.ItemRewardHandler(this);
         this.rewardManager = new RewardManager(this);
-        this.discordBot = new DiscordBot(this, linkManager);
 
-        getCommand("link").setExecutor(new LinkCommand(this));
-        getCommand("link").setTabCompleter(new EmptyTabCompleter());
-
-        getCommand("unlink").setExecutor(new UnlinkCommand(this));
-        getCommand("unlink").setTabCompleter(new EmptyTabCompleter());
-
-        getCommand("claim").setExecutor(new ClaimCommand(this));
-        getCommand("claim").setTabCompleter(new EmptyTabCompleter());
-
-        getCommand("setboosterreward").setExecutor(new SetBoosterRewardCommand(this));
-        getCommand("setboosterreward").setTabCompleter(new EmptyTabCompleter());
-
-        getCommand("forceunlink").setExecutor(new studio.jan1k.boosterrewards.commands.ForceUnlinkCommand(this));
-        getCommand("forceunlink").setTabCompleter(new studio.jan1k.boosterrewards.commands.ForceUnlinkTabCompleter());
-
-        MainCommand mainCmd = new MainCommand(this);
-        getCommand("boosterrewards").setExecutor(mainCmd);
-        getCommand("boosterrewards").setTabCompleter(mainCmd);
+        registerCommands();
 
         new RewardSyncTask(this).runTaskTimerAsynchronously(this, 100L,
                 getConfig().getLong("sync.interval", 300) * 20L);
@@ -130,7 +107,6 @@ public class BoosterReward extends JavaPlugin {
             new studio.jan1k.boosterrewards.integrations.BoosterRewardsExpansion(this).register();
         }
 
-        // Metrics
         if (getConfig().getBoolean("features.metrics", true)) {
             try {
                 new org.bstats.bukkit.Metrics(this, 29390);
@@ -139,12 +115,30 @@ public class BoosterReward extends JavaPlugin {
             }
         }
 
-        // Update Checker
         if (getConfig().getBoolean("features.update-checker", true)) {
             new studio.jan1k.boosterrewards.utils.UpdateChecker(this);
         }
+    }
 
-        // Module initialization complete
+    private void registerCommands() {
+        getCommand("link").setExecutor(new LinkCommand(this));
+        getCommand("link").setTabCompleter(new EmptyTabCompleter());
+
+        getCommand("unlink").setExecutor(new UnlinkCommand(this));
+        getCommand("unlink").setTabCompleter(new EmptyTabCompleter());
+
+        getCommand("claim").setExecutor(new ClaimCommand(this));
+        getCommand("claim").setTabCompleter(new EmptyTabCompleter());
+
+        getCommand("setboosterreward").setExecutor(new SetBoosterRewardCommand(this));
+        getCommand("setboosterreward").setTabCompleter(new EmptyTabCompleter());
+
+        getCommand("forceunlink").setExecutor(new studio.jan1k.boosterrewards.commands.ForceUnlinkCommand(this));
+        getCommand("forceunlink").setTabCompleter(new studio.jan1k.boosterrewards.commands.ForceUnlinkTabCompleter());
+
+        MainCommand mainCmd = new MainCommand(this);
+        getCommand("boosterrewards").setExecutor(mainCmd);
+        getCommand("boosterrewards").setTabCompleter(mainCmd);
     }
 
     @Override
@@ -182,27 +176,56 @@ public class BoosterReward extends JavaPlugin {
         Logs.raw(" ");
     }
 
-    private void printLicenseError(String title, String reason, String details) {
-        Logs.raw(" ");
-        Logs.raw("  §8============================================================");
-        Logs.raw("  §c" + title);
-        Logs.raw("  §8============================================================");
-        Logs.raw(" ");
-        Logs.raw("  §f" + reason);
-        Logs.raw("  §f" + details);
-        Logs.raw(" ");
-        Logs.raw("  §8------------------------------------------------------------");
-        Logs.raw("  §fSUPPORT: Create a ticket at §bhttps://discord.gg/38Ebj42e");
-        Logs.raw("  §8------------------------------------------------------------");
-        Logs.raw(" ");
-    }
-
     private void verifyBoostersOnStartup() {
-        Logs.info("Verifying saved boosters...");
-        int count = databaseManager.getActiveBoosterCount();
-        if (count > 0) {
-            Logs.database("Found " + count + " active boosters in database");
-        }
+        if (discordBot == null || discordBot.getJDA() == null)
+            return;
+
+        Logs.info("Verifying active boosters status with Discord...");
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            java.util.List<String> activeIds = databaseManager.getAllActiveBoosters();
+            String guildId = configManager.getDiscordGuildId();
+            net.dv8tion.jda.api.entities.Guild guild = discordBot.getJDA().getGuildById(guildId);
+
+            if (guild == null)
+                return;
+
+            int offlineSyncs = 0;
+            for (String discordId : activeIds) {
+                try {
+                    net.dv8tion.jda.api.entities.Member member = guild.retrieveMemberById(discordId).complete();
+                    if (member == null)
+                        continue;
+
+                    boolean isBoosting = member.getTimeBoosted() != null;
+
+                    int boostCount = 0;
+                    if (isBoosting) {
+                        for (net.dv8tion.jda.api.entities.Member booster : guild.getBoosters()) {
+                            if (booster.getId().equals(discordId)) {
+                                boostCount++;
+                            }
+                        }
+                    }
+
+                    UUID uuid = databaseManager.getUuid(discordId);
+                    if (uuid != null) {
+                        databaseManager.setBoosterStatus(uuid, isBoosting, boostCount);
+
+                        if (isBoosting) {
+                            rewardManager.giveReward(uuid, "booster");
+                            if (boostCount >= 2 && getConfig().getBoolean("rewards.booster_2.enabled", false)) {
+                                rewardManager.giveReward(uuid, "booster_2");
+                            }
+                        }
+                        offlineSyncs++;
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+            if (offlineSyncs > 0) {
+                Logs.info("Verified " + offlineSyncs + " boosters from database.");
+            }
+        });
     }
 
     public static BoosterReward getInstance() {

@@ -48,54 +48,12 @@
 bot:
   # Your Discord Bot Token (from step 5 above)
   # Example: "MTIzNDU2Nzg5MDEyMzQ1Njc4.Gh1234.abcdefghijklmnopqrstuvwxyz1234567890"
-  token: "YOUR_BOT_TOKEN_HERE"
+  token: ""
   
   # Your Discord Server (Guild) ID
   # HOW TO GET: Right-click your server icon > "Copy Server ID"
   # Example: "123456789012345678"
-  guild-id: "000000000000000000"
-
-# =============================================================================
-# ROLE IDS (OPTIONAL)
-# =============================================================================
-# These are EXTRA roles you can assign to users. The plugin detects boosters
-# automatically - you don't need to set a booster role here.
-#
-# HOW TO GET ROLE ID:
-#   1. Go to Server Settings > Roles
-#   2. Right-click the role you want
-#   3. Click "Copy Role ID"
-#
-# Set to "000000000000000000" or leave as-is to disable.
-# =============================================================================
-roles:
-  # Role to give when a user links their Minecraft account
-  # Useful for tracking who has linked their account
-  linked-role-id: "000000000000000000"
-  
-  # Additional role to give to boosters (on top of their rewards)
-  # This is OPTIONAL - booster detection works without it
-  custom-booster-role-id: "000000000000000000"
-
-# =============================================================================
-# CHANNEL IDS (OPTIONAL)
-# =============================================================================
-# Channels for logging and announcements.
-#
-# HOW TO GET CHANNEL ID:
-#   1. Right-click the text channel
-#   2. Click "Copy Channel ID"
-#
-# Set to "000000000000000000" or leave as-is to disable.
-# =============================================================================
-channels:
-  # Channel where boost announcements are sent
-  # When someone boosts while linked, it posts a celebration message
-  boost-announcements: "000000000000000000"
-  
-  # Channel for logging link/unlink activity (staff-only channel recommended)
-  # Shows when players link or unlink their accounts
-  link-logs: "000000000000000000"
+  guild-id: ""
 
 # =============================================================================
 # SLASH COMMANDS

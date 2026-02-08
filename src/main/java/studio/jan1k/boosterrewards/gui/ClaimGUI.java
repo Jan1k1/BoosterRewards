@@ -135,70 +135,77 @@ public class ClaimGUI implements Listener, InventoryHolder {
             return;
 
         ClaimGUI gui = (ClaimGUI) event.getInventory().getHolder();
-        event.setCancelled(true); // Prevent picking up items
 
-        if (event.getClickedInventory() != event.getView().getTopInventory())
+        // Always cancel if clicking in the top inventory (the vault)
+        if (event.getClickedInventory() == event.getView().getTopInventory()) {
+            event.setCancelled(true);
+
+            Player player = (Player) event.getWhoClicked();
+            int slot = event.getSlot();
+
+            if (gui.slotToRewardId.containsKey(slot)) {
+                claimReward(player, gui, slot);
+            }
+        } else if (event.isShiftClick()) {
+            // Prevent shift-clicking items into the vault
+            event.setCancelled(true);
+        }
+    }
+
+    private void claimReward(Player player, ClaimGUI gui, int slot) {
+        ItemStack item = gui.inventory.getItem(slot);
+        if (item == null || item.getType() == Material.AIR)
             return;
 
-        Player player = (Player) event.getWhoClicked();
-        int slot = event.getSlot();
+        int rewardId = gui.slotToRewardId.get(slot);
 
-        if (gui.slotToRewardId.containsKey(slot)) {
-            int rewardId = gui.slotToRewardId.get(slot);
-            ItemStack item = event.getCurrentItem();
-
-            if (item == null || item.getType() == Material.AIR)
-                return;
-
-            // Check for space
-            if (player.getInventory().firstEmpty() == -1) {
-                player.sendMessage(ChatColor.RED + "Your inventory is full!");
-                return;
-            }
-
-            // Lock slot to prevent multiple clicks
-            gui.slotToRewardId.remove(slot);
-            event.getInventory().setItem(slot, null);
-
-            // Remove from DB (Async)
-            Bukkit.getScheduler().runTaskAsynchronously(gui.plugin, () -> {
-                try {
-                    // We attempt to remove it first. If successful, we give it in-game.
-                    // This is the secure way to prevent dupes.
-                    gui.plugin.getDatabaseManager().removePendingReward(rewardId);
-
-                    // Give Item on Main Thread
-                    Bukkit.getScheduler().runTask(gui.plugin, () -> {
-                        if (player.isOnline()) {
-                            // Remove "Click to Claim" lore before giving
-                            ItemStack toGive = item.clone();
-                            ItemMeta meta = toGive.getItemMeta();
-                            if (meta != null && meta.hasLore()) {
-                                List<String> lore = meta.getLore();
-                                if (lore.size() >= 2 && lore.get(lore.size() - 1).contains("Click to Claim")) {
-                                    lore.remove(lore.size() - 1);
-                                    lore.remove(lore.size() - 1);
-                                    meta.setLore(lore);
-                                }
-                                toGive.setItemMeta(meta);
-                            }
-                            player.getInventory().addItem(toGive);
-                            player.sendMessage(ChatColor.GREEN + "Reward claimed!");
-                        }
-                    });
-                } catch (Exception e) {
-                    player.sendMessage(ChatColor.RED + "An error occurred while claiming your reward.");
-                    e.printStackTrace();
-                    // Restore item if DB fails? (Ideally DB shouldn't fail, but let's be safe)
-                    Bukkit.getScheduler().runTask(gui.plugin, () -> {
-                        if (player.isOnline()) {
-                            event.getInventory().setItem(slot, item);
-                            gui.slotToRewardId.put(slot, rewardId);
-                        }
-                    });
-                }
-            });
+        // Check for space
+        if (player.getInventory().firstEmpty() == -1) {
+            player.sendMessage(ChatColor.RED + "Your inventory is full!");
+            return;
         }
+
+        // Lock slot to prevent multiple clicks
+        gui.slotToRewardId.remove(slot);
+        gui.inventory.setItem(slot, null);
+
+        // Remove from DB (Async)
+        Bukkit.getScheduler().runTaskAsynchronously(gui.plugin, () -> {
+            try {
+                gui.plugin.getDatabaseManager().removePendingReward(rewardId);
+
+                // Give Item on Main Thread
+                Bukkit.getScheduler().runTask(gui.plugin, () -> {
+                    if (player.isOnline()) {
+                        ItemStack toGive = item.clone();
+                        ItemMeta meta = toGive.getItemMeta();
+                        if (meta != null && meta.hasLore()) {
+                            List<String> lore = meta.getLore();
+                            // Remove the "Click to Claim" indicator
+                            if (!lore.isEmpty() && lore.get(lore.size() - 1).contains("Click to Claim")) {
+                                lore.remove(lore.size() - 1);
+                                if (!lore.isEmpty() && lore.get(lore.size() - 1).trim().isEmpty()) {
+                                    lore.remove(lore.size() - 1);
+                                }
+                                meta.setLore(lore);
+                            }
+                            toGive.setItemMeta(meta);
+                        }
+                        player.getInventory().addItem(toGive);
+                        player.sendMessage(ChatColor.GREEN + "Reward claimed!");
+                    }
+                });
+            } catch (Exception e) {
+                player.sendMessage(ChatColor.RED + "An error occurred while claiming your reward.");
+                e.printStackTrace();
+                Bukkit.getScheduler().runTask(gui.plugin, () -> {
+                    if (player.isOnline()) {
+                        gui.inventory.setItem(slot, item);
+                        gui.slotToRewardId.put(slot, rewardId);
+                    }
+                });
+            }
+        });
     }
 
     @EventHandler

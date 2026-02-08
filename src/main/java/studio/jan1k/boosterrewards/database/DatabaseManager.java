@@ -150,6 +150,23 @@ public class DatabaseManager {
         return rewards;
     }
 
+    public boolean hasPendingReward(UUID uuid, String rewardType) {
+        String sql = "SELECT COUNT(*) FROM " + tablePrefix + "pending_rewards WHERE uuid = ? AND reward_type = ?";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, rewardType);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public void removePendingReward(int id) {
         String sql = "DELETE FROM " + tablePrefix + "pending_rewards WHERE id = ?";
         try (Connection conn = getConnection();
@@ -260,13 +277,24 @@ public class DatabaseManager {
             return;
 
         if (isBooster) {
-            String sql = "UPDATE " + tablePrefix
-                    + "boosters SET is_active = TRUE, boost_count = ?, last_checked = ? WHERE discord_id = ?";
+            String sql = "INSERT INTO " + tablePrefix
+                    + "boosters (discord_id, uuid, boost_count, is_active, last_checked, boost_start, username) "
+                    + "VALUES (?, ?, ?, TRUE, ?, ?, 'Unknown') "
+                    + "ON DUPLICATE KEY UPDATE uuid = VALUES(uuid), boost_count = VALUES(boost_count), is_active = TRUE, last_checked = VALUES(last_checked)";
+
+            if (plugin.getConfig().getString("database.type", "H2").equalsIgnoreCase("H2")) {
+                sql = "MERGE INTO " + tablePrefix
+                        + "boosters (discord_id, uuid, boost_count, is_active, last_checked, boost_start, username) "
+                        + "KEY (discord_id) VALUES (?, ?, ?, TRUE, ?, ?, 'Unknown')";
+            }
+
             try (Connection conn = getConnection();
                     PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, boostCount);
-                stmt.setLong(2, System.currentTimeMillis());
-                stmt.setString(3, discordId);
+                stmt.setString(1, discordId);
+                stmt.setString(2, uuid.toString());
+                stmt.setInt(3, boostCount);
+                stmt.setLong(4, System.currentTimeMillis());
+                stmt.setLong(5, System.currentTimeMillis()); // Use current time as boost_start if new
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();

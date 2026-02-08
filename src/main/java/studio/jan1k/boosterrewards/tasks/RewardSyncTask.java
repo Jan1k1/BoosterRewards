@@ -51,7 +51,7 @@ public class RewardSyncTask extends BukkitRunnable {
     }
 
     private void checkRewards(Player player, Member member) {
-        boolean isBooster = member.isBoosting();
+        boolean isBooster = member.getTimeBoosted() != null;
         int boostCount = 0;
         if (isBooster) {
             for (Member booster : member.getGuild().getBoosters()) {
@@ -61,5 +61,12 @@ public class RewardSyncTask extends BukkitRunnable {
             }
         }
         plugin.getDatabaseManager().setBoosterStatus(player.getUniqueId(), isBooster, boostCount);
+
+        if (isBooster) {
+            plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
+            if (boostCount >= 2 && plugin.getConfig().getBoolean("rewards.booster_2.enabled", false)) {
+                plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
+            }
+        }
     }
 }

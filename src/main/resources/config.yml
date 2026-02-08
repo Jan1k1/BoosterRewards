@@ -105,21 +105,8 @@ rewards:
     permission: "boosterrewards.doublebooster"
     on-boost:
       - "give %player% diamond 10"
-      - "msg %player% &dThanks for your second boost!"
-    on-stop: []
     cooldown: 0
     one-time: false
-
-  # Example of a secondary reward tier (disabled by default)
-  # You can add as many tiers as you want
-  Booster-subscriber:
-    enabled: false
-    role-id: "000000000000000000"  # Specific Discord role to check for
-    permission: "boosterrewards.subscriber"
-    on-boost:
-      - "lp user %player% parent add subscriber"
-    on-stop:
-      - "lp user %player% parent remove subscriber"
 
 # =============================================================================
 # SYNC & VERIFICATION SETTINGS
@@ -226,10 +213,9 @@ features:
   auto-claim: true
   
   # ANNOUNCE BOOSTS
-  # Post a message in Discord when a linked player boosts.
-  # Uses the channel set in discord.yml > channels > boost-announcements
+  # Post a message when a linked player boosts.
   # Set to false for silent operation.
-  announce-boosts: true
+  announce-boosts: false
 
 # =============================================================================
 # LINK PANEL (Optional Discord Embed)
