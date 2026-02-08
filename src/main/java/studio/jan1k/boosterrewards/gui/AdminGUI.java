@@ -131,11 +131,17 @@ public class AdminGUI implements Listener, InventoryHolder {
         if (rewardPath == null || !plugin.getConfig().contains(rewardPath))
             return;
 
-        List<Map<?, ?>> items = plugin.getConfig().getMapList(rewardPath);
-        for (Map<?, ?> map : items) {
-            try {
-                inventory.addItem(ItemSerializer.deserialize((Map<String, Object>) map));
-            } catch (Exception e) {
+        List<?> items = plugin.getConfig().getList(rewardPath);
+        if (items != null) {
+            for (Object obj : items) {
+                if (obj instanceof ItemStack) {
+                    inventory.addItem((ItemStack) obj);
+                } else if (obj instanceof Map) {
+                    try {
+                        inventory.addItem(ItemSerializer.deserialize((Map<String, Object>) obj));
+                    } catch (Exception ignored) {
+                    }
+                }
             }
         }
     }
@@ -207,10 +213,10 @@ public class AdminGUI implements Listener, InventoryHolder {
     }
 
     private void saveRewards(Inventory inv, String path) {
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<ItemStack> list = new ArrayList<>();
         for (ItemStack item : inv.getContents()) {
             if (item != null && item.getType() != Material.AIR) {
-                list.add(ItemSerializer.serialize(item));
+                list.add(item);
             }
         }
         plugin.getConfig().set(path, list);

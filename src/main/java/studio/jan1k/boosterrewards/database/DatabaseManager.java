@@ -106,6 +106,15 @@ public class DatabaseManager {
                             "created_at BIGINT NOT NULL)")) {
                 stmt.execute();
             }
+
+            try (PreparedStatement stmt = conn
+                    .prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "claimed_rewards (" +
+                            "uuid VARCHAR(36) NOT NULL, " +
+                            "reward_type VARCHAR(32) NOT NULL, " +
+                            "claimed_at BIGINT NOT NULL, " +
+                            "PRIMARY KEY (uuid, reward_type))")) {
+                stmt.execute();
+            }
         } catch (SQLException e) {
             Logs.error("Failed to initialize database tables!");
             e.printStackTrace();
@@ -178,6 +187,40 @@ public class DatabaseManager {
         }
     }
 
+    public boolean hasAlreadyClaimed(UUID uuid, String rewardType) {
+        String sql = "SELECT COUNT(*) FROM " + tablePrefix + "claimed_rewards WHERE uuid = ? AND reward_type = ?";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, rewardType);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void addClaimRecord(UUID uuid, String rewardType) {
+        String sql = "INSERT INTO " + tablePrefix + "claimed_rewards (uuid, reward_type, claimed_at) VALUES (?, ?, ?)";
+        if (plugin.getConfig().getString("database.type", "H2").equalsIgnoreCase("H2")) {
+            sql = "MERGE INTO " + tablePrefix
+                    + "claimed_rewards (uuid, reward_type, claimed_at) KEY (uuid, reward_type) VALUES (?, ?, ?)";
+        }
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, rewardType);
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static class PendingReward {
         private final int id;
         private final UUID uuid;
@@ -211,6 +254,18 @@ public class DatabaseManager {
 
         public long getCreatedAt() {
             return createdAt;
+        }
+    }
+
+    public void removeClaimRecord(UUID uuid, String rewardType) {
+        String sql = "DELETE FROM " + tablePrefix + "claimed_rewards WHERE uuid = ? AND reward_type = ?";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, rewardType);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

@@ -84,6 +84,28 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             case "setboosterreward":
                 new SetBoosterRewardCommand(plugin).onCommand(sender, command, "setboosterreward", new String[0]);
                 break;
+            case "resetclaim":
+                if (!sender.hasPermission("boosterrewards.admin")) {
+                    sender.sendMessage(ChatColor.RED + "No permission.");
+                    return true;
+                }
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /br resetclaim <player> [tier]");
+                    return true;
+                }
+                handleResetClaim(sender, args);
+                break;
+            case "stats":
+                if (!sender.hasPermission("boosterrewards.admin")) {
+                    sender.sendMessage(ChatColor.RED + "No permission.");
+                    return true;
+                }
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /br stats <player>");
+                    return true;
+                }
+                handleStats(sender, args);
+                break;
             case "help":
             default:
                 sendHelp(sender);
@@ -102,7 +124,48 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         if (sender.hasPermission("boosterrewards.admin")) {
             sender.sendMessage(ChatColor.WHITE + "/br reload " + ChatColor.GRAY + "- Reload config");
             sender.sendMessage(ChatColor.WHITE + "/br admin " + ChatColor.GRAY + "- Open Admin Panel");
+            sender.sendMessage(ChatColor.WHITE + "/br stats <player> " + ChatColor.GRAY + "- View player sync stats");
+            sender.sendMessage(
+                    ChatColor.WHITE + "/br resetclaim <player> [tier] " + ChatColor.GRAY + "- Reset claim history");
         }
+    }
+
+    private void handleResetClaim(CommandSender sender, String[] args) {
+        org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(args[1]);
+        java.util.UUID uuid = target.getUniqueId();
+        String tier = args.length > 2 ? args[2] : null;
+
+        if (tier != null) {
+            plugin.getDatabaseManager().removeClaimRecord(uuid, tier);
+            sender.sendMessage(ChatColor.GREEN + "Reset claim for " + target.getName() + " (Tier: " + tier + ")");
+        } else {
+            plugin.getDatabaseManager().removeClaimRecord(uuid, "booster");
+            plugin.getDatabaseManager().removeClaimRecord(uuid, "booster_2");
+            sender.sendMessage(ChatColor.GREEN + "Reset all claims for " + target.getName());
+        }
+    }
+
+    private void handleStats(CommandSender sender, String[] args) {
+        org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(args[1]);
+        java.util.UUID uuid = target.getUniqueId();
+        String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
+        boolean isBoosting = plugin.getDatabaseManager().isBoosting(uuid);
+        int boostCount = plugin.getDatabaseManager().getBoostCount(uuid);
+        boolean claimed1 = plugin.getDatabaseManager().hasAlreadyClaimed(uuid, "booster");
+        boolean claimed2 = plugin.getDatabaseManager().hasAlreadyClaimed(uuid, "booster_2");
+
+        sender.sendMessage(
+                ChatColor.GRAY + "--- Stats for " + ChatColor.WHITE + target.getName() + ChatColor.GRAY + " ---");
+        sender.sendMessage(ChatColor.GRAY + "UUID: " + ChatColor.WHITE + uuid);
+        sender.sendMessage(
+                ChatColor.GRAY + "Discord ID: " + ChatColor.WHITE + (discordId != null ? discordId : "Not Linked"));
+        sender.sendMessage(
+                ChatColor.GRAY + "Is Boosting (DB): " + (isBoosting ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No"));
+        sender.sendMessage(ChatColor.GRAY + "Boost Count (DB): " + ChatColor.WHITE + boostCount);
+        sender.sendMessage(
+                ChatColor.GRAY + "Claimed Tier 1: " + (claimed1 ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No"));
+        sender.sendMessage(
+                ChatColor.GRAY + "Claimed Tier 2: " + (claimed2 ? ChatColor.GREEN + "Yes" : ChatColor.RED + "No"));
     }
 
     @Override
@@ -117,8 +180,14 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("boosterrewards.admin")) {
                 completions.add("reload");
                 completions.add("admin");
+                completions.add("stats");
+                completions.add("resetclaim");
             }
             return filter(completions, args[0]);
+        }
+        if (args.length == 2 && ("stats".equalsIgnoreCase(args[0]) || "resetclaim".equalsIgnoreCase(args[0])
+                || "unlink".equalsIgnoreCase(args[0]))) {
+            return null; // Return null to show player lists
         }
         return Collections.emptyList();
     }

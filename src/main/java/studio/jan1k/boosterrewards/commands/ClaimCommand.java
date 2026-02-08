@@ -33,6 +33,17 @@ public class ClaimCommand implements CommandExecutor {
             return true;
         }
 
+        // 1.5 Check if already claimed all available tiers
+        boolean claimed1 = plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster");
+        boolean tier2Enabled = plugin.getConfig().getBoolean("rewards.booster_2.enabled", false);
+        boolean claimed2 = !tier2Enabled
+                || plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster_2");
+
+        if (claimed1 && claimed2) {
+            player.sendMessage(ChatColor.YELLOW + "✅ You have already claimed all your booster rewards!");
+            return true;
+        }
+
         // 2. Check if boosting (with a quick sync check if record is negative)
         if (!plugin.getDatabaseManager().isBoosting(player.getUniqueId())) {
             // Attempt a quick sync from Discord before failing
@@ -78,9 +89,13 @@ public class ClaimCommand implements CommandExecutor {
                     return;
 
                 if (isBoosting) {
-                    plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
+                    if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster")) {
+                        plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
+                    }
                     if (finalBoostCount >= 2 && plugin.getConfig().getBoolean("rewards.booster_2.enabled", false)) {
-                        plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
+                        if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster_2")) {
+                            plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
+                        }
                     }
                     new studio.jan1k.boosterrewards.gui.ClaimSelectorGUI(plugin, player, finalBoostCount);
                 } else {

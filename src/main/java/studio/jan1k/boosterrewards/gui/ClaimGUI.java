@@ -192,6 +192,7 @@ public class ClaimGUI implements Listener, InventoryHolder {
                             toGive.setItemMeta(meta);
                         }
                         player.getInventory().addItem(toGive);
+                        gui.plugin.getDatabaseManager().addClaimRecord(player.getUniqueId(), gui.tier);
                         player.sendMessage(ChatColor.GREEN + "Reward claimed!");
                     }
                 });

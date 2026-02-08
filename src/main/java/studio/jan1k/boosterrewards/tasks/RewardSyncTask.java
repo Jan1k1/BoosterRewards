@@ -63,9 +63,13 @@ public class RewardSyncTask extends BukkitRunnable {
         plugin.getDatabaseManager().setBoosterStatus(player.getUniqueId(), isBooster, boostCount);
 
         if (isBooster) {
-            plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
+            if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster")) {
+                plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
+            }
             if (boostCount >= 2 && plugin.getConfig().getBoolean("rewards.booster_2.enabled", false)) {
-                plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
+                if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster_2")) {
+                    plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
+                }
             }
         }
     }

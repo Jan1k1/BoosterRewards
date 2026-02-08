@@ -212,9 +212,13 @@ public class BoosterReward extends JavaPlugin {
                         databaseManager.setBoosterStatus(uuid, isBoosting, boostCount);
 
                         if (isBoosting) {
-                            rewardManager.giveReward(uuid, "booster");
+                            if (!databaseManager.hasAlreadyClaimed(uuid, "booster")) {
+                                rewardManager.giveReward(uuid, "booster");
+                            }
                             if (boostCount >= 2 && getConfig().getBoolean("rewards.booster_2.enabled", false)) {
-                                rewardManager.giveReward(uuid, "booster_2");
+                                if (!databaseManager.hasAlreadyClaimed(uuid, "booster_2")) {
+                                    rewardManager.giveReward(uuid, "booster_2");
+                                }
                             }
                         }
                         offlineSyncs++;

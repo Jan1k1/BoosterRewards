@@ -18,8 +18,9 @@ public class RewardManager {
 
     public void giveReward(UUID uuid, String tier) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            // Check if player already has rewards of this tier pending
-            if (plugin.getDatabaseManager().hasPendingReward(uuid, tier)) {
+            // Check if player already has rewards of this tier pending or already claimed
+            if (plugin.getDatabaseManager().hasPendingReward(uuid, tier) ||
+                    plugin.getDatabaseManager().hasAlreadyClaimed(uuid, tier)) {
                 return;
             }
 
