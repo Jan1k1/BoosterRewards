@@ -36,6 +36,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 }
                 plugin.reloadConfig();
                 plugin.getConfigManager().loadFullConfigs();
+                plugin.getItemRewardHandler().refreshCache();
                 sender.sendMessage(ChatColor.GREEN + "BoosterRewards configuration reloaded!");
                 break;
             case "link":

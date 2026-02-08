@@ -12,6 +12,12 @@ public class ItemSerializer {
             return new HashMap<>();
         }
         Map<String, Object> serialized = item.serialize();
+        if (!serialized.containsKey("v")) {
+            try {
+                serialized.put("v", org.bukkit.Bukkit.getUnsafe().getDataVersion());
+            } catch (Exception ignored) {
+            }
+        }
         if (!serialized.containsKey("==")) {
             serialized.put("==", "org.bukkit.inventory.ItemStack");
         }

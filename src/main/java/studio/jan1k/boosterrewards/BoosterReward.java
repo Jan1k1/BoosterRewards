@@ -52,6 +52,14 @@ public class BoosterReward extends JavaPlugin {
         configManager = new ConfigManager(this);
         saveDefaultConfig();
         configManager.loadFullConfigs();
+        // The instruction implies a reload functionality, which would typically be
+        // handled by a command.
+        // The provided snippet seems to be from a reload command context.
+        // Since this is onEnable, the initial load is handled by loadCoreModules().
+        // If a reload command exists, it should call configManager.loadFullConfigs()
+        // and itemRewardHandler.refreshCache().
+        // For now, we ensure refreshCache is called during initial setup via
+        // loadCoreModules().
 
         loadCoreModules();
 
@@ -86,6 +94,7 @@ public class BoosterReward extends JavaPlugin {
         this.linkManager = new LinkManager();
         this.itemRewardHandler = new studio.jan1k.boosterrewards.core.ItemRewardHandler(this);
         this.rewardManager = new RewardManager(this);
+        this.itemRewardHandler.refreshCache();
 
         registerCommands();
 

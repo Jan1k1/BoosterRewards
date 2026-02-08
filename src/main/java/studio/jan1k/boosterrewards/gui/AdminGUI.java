@@ -126,23 +126,15 @@ public class AdminGUI implements Listener, InventoryHolder {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadRewards() {
-        if (rewardPath == null || !plugin.getConfig().contains(rewardPath))
+        if (rewardPath == null)
             return;
 
-        List<?> items = plugin.getConfig().getList(rewardPath);
-        if (items != null) {
-            for (Object obj : items) {
-                if (obj instanceof ItemStack) {
-                    inventory.addItem((ItemStack) obj);
-                } else if (obj instanceof Map) {
-                    try {
-                        inventory.addItem(ItemSerializer.deserialize((Map<String, Object>) obj));
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
+        String tier = rewardPath.contains("booster_2") ? "booster_2" : "booster";
+        List<ItemStack> items = plugin.getItemRewardHandler().getCachedRewards(tier);
+
+        for (ItemStack item : items) {
+            inventory.addItem(item.clone());
         }
     }
 
@@ -206,7 +198,6 @@ public class AdminGUI implements Listener, InventoryHolder {
         // Save only if looking at an editor
         if (gui.mode == GuiMode.EDITOR && gui.rewardPath != null) {
             saveRewards(event.getInventory(), gui.rewardPath);
-            plugin.reloadConfig(); // Reload to apply changes immediately
             event.getPlayer().sendMessage(ChatColor.GREEN + "Rewards saved for "
                     + (gui.rewardPath.contains("booster_2") ? "Tier 2" : "Tier 1") + "!");
         }
@@ -221,5 +212,7 @@ public class AdminGUI implements Listener, InventoryHolder {
         }
         plugin.getConfig().set(path, list);
         plugin.saveConfig();
+        // Update cache immediately
+        plugin.getItemRewardHandler().refreshCache();
     }
 }
