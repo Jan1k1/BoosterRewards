@@ -22,7 +22,9 @@ public class ClaimSelectorGUI implements Listener, InventoryHolder {
     private final int boostCount;
 
     public ClaimSelectorGUI(BoosterReward plugin, Player player) {
-        this(plugin, player, plugin.getDatabaseManager().getBoostCount(player.getUniqueId()));
+        this(plugin, player, (player != null && plugin.getDatabaseManager() != null)
+                ? plugin.getDatabaseManager().getBoostCount(player.getUniqueId())
+                : 0);
     }
 
     public ClaimSelectorGUI(BoosterReward plugin, Player player, int boostCount) {
@@ -30,10 +32,14 @@ public class ClaimSelectorGUI implements Listener, InventoryHolder {
         this.boostCount = boostCount;
         this.inventory = player != null ? Bukkit.createInventory(this, 27, "Select Reward Tier") : null;
 
-        if (player != null) {
+        if (player != null && inventory != null) {
             setupMenu(player);
             player.openInventory(inventory);
         }
+    }
+
+    public int getBoostCount() {
+        return boostCount;
     }
 
     private void setupMenu(Player player) {
@@ -100,17 +106,19 @@ public class ClaimSelectorGUI implements Listener, InventoryHolder {
         if (item == null || item.getItemMeta() == null)
             return;
 
+        ClaimSelectorGUI gui = (ClaimSelectorGUI) event.getInventory().getHolder();
+        int currentBoostCount = gui.getBoostCount();
         String name = item.getItemMeta().getDisplayName();
 
         if (name.contains("Booster Tier 1")) {
-            if (boostCount >= 1) {
+            if (currentBoostCount >= 1) {
                 player.closeInventory();
                 new ClaimGUI(plugin, player, "booster");
             } else {
                 player.sendMessage(ChatColor.RED + "You need at least 1 boost to claim this tier!");
             }
         } else if (name.contains("Booster Tier 2")) {
-            if (boostCount >= 2) {
+            if (currentBoostCount >= 2) {
                 player.closeInventory();
                 new ClaimGUI(plugin, player, "booster_2");
             } else {
