@@ -1,7 +1,6 @@
 package studio.jan1k.boosterrewards.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -18,12 +17,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.core.ItemSerializer;
 import studio.jan1k.boosterrewards.database.DatabaseManager;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class ClaimGUI implements Listener, InventoryHolder {
 
@@ -31,20 +30,21 @@ public class ClaimGUI implements Listener, InventoryHolder {
     private final Inventory inventory;
     private final String tier;
     private final Map<Integer, Integer> slotToRewardId = new HashMap<>();
+    private final Map<Integer, String> slotToItemHash = new HashMap<>();
 
-    // Constructor for Listener registration
     public ClaimGUI(BoosterReward plugin) {
         this.plugin = plugin;
         this.inventory = null;
         this.tier = null;
     }
 
-    // Constructor for opening GUI
     public ClaimGUI(BoosterReward plugin, Player player, String tier) {
         this.plugin = plugin;
         this.tier = tier;
         String title = tier.equals("booster_2") ? "Claim: Tier 2" : "Claim: Tier 1";
-        this.inventory = Bukkit.createInventory(this, 54, title);
+        this.inventory = studio.jan1k.boosterrewards.utils.SchedulerUtils.isFolia()
+                ? org.bukkit.Bukkit.createInventory(this, 54, title)
+                : org.bukkit.Bukkit.createInventory(this, 54, title);
 
         if (player.getGameMode() == GameMode.CREATIVE) {
             player.sendMessage(ChatColor.RED + "You cannot claim rewards in Creative mode.");
@@ -60,16 +60,16 @@ public class ClaimGUI implements Listener, InventoryHolder {
     }
 
     private void loadRewards(Player player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtils.runAsync(plugin, () -> {
             List<DatabaseManager.PendingReward> rewards = plugin.getDatabaseManager()
                     .getPendingRewards(player.getUniqueId());
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtils.runSync(plugin, () -> {
                 if (!player.isOnline())
                     return;
 
                 if (rewards.isEmpty()) {
-                    player.sendMessage(ChatColor.YELLOW + "You have no pending rewards for this tier.");
+                    player.sendMessage(ChatColor.YELLOW + "You have no pending rewards.");
                     return;
                 }
 
@@ -90,14 +90,13 @@ public class ClaimGUI implements Listener, InventoryHolder {
 
                 for (DatabaseManager.PendingReward reward : filtered) {
                     if (slot >= 54)
-                        break; // GUI full
+                        break;
 
                     try {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> itemMap = mapper.readValue(reward.getRewardData(), Map.class);
                         ItemStack item = ItemSerializer.deserialize(itemMap);
 
-                        // Add some lore to indicate it's claimable
                         ItemMeta meta = item.getItemMeta();
                         if (meta != null) {
                             List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
@@ -109,6 +108,9 @@ public class ClaimGUI implements Listener, InventoryHolder {
 
                         inventory.setItem(slot, item);
                         slotToRewardId.put(slot, reward.getId());
+                        if (reward.getItemHash() != null) {
+                            slotToItemHash.put(slot, reward.getItemHash());
+                        }
                         slot++;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -125,10 +127,6 @@ public class ClaimGUI implements Listener, InventoryHolder {
         return inventory;
     }
 
-    /*
-     * LISTENER EVENTS
-     */
-
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getInventory().getHolder() instanceof ClaimGUI))
@@ -136,8 +134,11 @@ public class ClaimGUI implements Listener, InventoryHolder {
 
         ClaimGUI gui = (ClaimGUI) event.getInventory().getHolder();
 
-        // Always cancel if clicking in the top inventory (the vault)
-        if (event.getClickedInventory() == event.getView().getTopInventory()) {
+        Inventory clickedInventory = event.getClickedInventory();
+        if (clickedInventory == null)
+            return;
+
+        if (clickedInventory.equals(event.getView().getTopInventory())) {
             event.setCancelled(true);
 
             Player player = (Player) event.getWhoClicked();
@@ -147,7 +148,6 @@ public class ClaimGUI implements Listener, InventoryHolder {
                 claimReward(player, gui, slot);
             }
         } else if (event.isShiftClick()) {
-            // Prevent shift-clicking items into the vault
             event.setCancelled(true);
         }
     }
@@ -159,29 +159,24 @@ public class ClaimGUI implements Listener, InventoryHolder {
 
         int rewardId = gui.slotToRewardId.get(slot);
 
-        // Check for space
         if (player.getInventory().firstEmpty() == -1) {
             player.sendMessage(ChatColor.RED + "Your inventory is full!");
             return;
         }
 
-        // Lock slot to prevent multiple clicks
         gui.slotToRewardId.remove(slot);
         gui.inventory.setItem(slot, null);
 
-        // Remove from DB (Async)
-        Bukkit.getScheduler().runTaskAsynchronously(gui.plugin, () -> {
+        SchedulerUtils.runAsync(gui.plugin, () -> {
             try {
                 gui.plugin.getDatabaseManager().removePendingReward(rewardId);
 
-                // Give Item on Main Thread
-                Bukkit.getScheduler().runTask(gui.plugin, () -> {
+                SchedulerUtils.runSync(gui.plugin, () -> {
                     if (player.isOnline()) {
                         ItemStack toGive = item.clone();
                         ItemMeta meta = toGive.getItemMeta();
                         if (meta != null && meta.hasLore()) {
                             List<String> lore = meta.getLore();
-                            // Remove the "Click to Claim" indicator
                             if (!lore.isEmpty() && lore.get(lore.size() - 1).contains("Click to Claim")) {
                                 lore.remove(lore.size() - 1);
                                 if (!lore.isEmpty() && lore.get(lore.size() - 1).trim().isEmpty()) {
@@ -192,14 +187,20 @@ public class ClaimGUI implements Listener, InventoryHolder {
                             toGive.setItemMeta(meta);
                         }
                         player.getInventory().addItem(toGive);
+
+                        String hash = gui.slotToItemHash.get(slot);
+                        if (hash != null) {
+                            gui.plugin.getDatabaseManager().addItemClaimRecord(player.getUniqueId(), hash);
+                        }
+
                         gui.plugin.getDatabaseManager().addClaimRecord(player.getUniqueId(), gui.tier);
                         player.sendMessage(ChatColor.GREEN + "Reward claimed!");
                     }
                 });
             } catch (Exception e) {
-                player.sendMessage(ChatColor.RED + "An error occurred while claiming your reward.");
+                player.sendMessage(ChatColor.RED + "An error occurred.");
                 e.printStackTrace();
-                Bukkit.getScheduler().runTask(gui.plugin, () -> {
+                SchedulerUtils.runSync(gui.plugin, () -> {
                     if (player.isOnline()) {
                         gui.inventory.setItem(slot, item);
                         gui.slotToRewardId.put(slot, rewardId);

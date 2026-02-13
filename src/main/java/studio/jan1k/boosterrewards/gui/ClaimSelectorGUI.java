@@ -98,7 +98,11 @@ public class ClaimSelectorGUI implements Listener, InventoryHolder {
 
         event.setCancelled(true);
 
-        if (event.getClickedInventory() != event.getView().getTopInventory())
+        Inventory clickedInventory = event.getClickedInventory();
+        if (clickedInventory == null)
+            return;
+
+        if (!clickedInventory.equals(event.getView().getTopInventory()))
             return;
 
         Player player = (Player) event.getWhoClicked();

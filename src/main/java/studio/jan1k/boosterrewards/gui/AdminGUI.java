@@ -13,11 +13,10 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import studio.jan1k.boosterrewards.BoosterReward;
-import studio.jan1k.boosterrewards.core.ItemSerializer;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class AdminGUI implements Listener, InventoryHolder {
 
@@ -50,7 +49,6 @@ public class AdminGUI implements Listener, InventoryHolder {
         }
     }
 
-    // Default constructor for Main Menu
     public AdminGUI(BoosterReward plugin) {
         this(plugin, GuiMode.MAIN_MENU, null);
     }
@@ -58,7 +56,6 @@ public class AdminGUI implements Listener, InventoryHolder {
     private void setupMainMenu() {
         fillGlass();
 
-        // Button: Edit Rewards (Opens Selector)
         ItemStack rewardsBtn = new ItemStack(Material.DIAMOND_CHESTPLATE);
         ItemMeta rm = rewardsBtn.getItemMeta();
         rm.setDisplayName(ChatColor.AQUA + "Edit Rewards");
@@ -68,7 +65,6 @@ public class AdminGUI implements Listener, InventoryHolder {
         rewardsBtn.setItemMeta(rm);
         inventory.setItem(11, rewardsBtn);
 
-        // Button: Post Discord Panel
         ItemStack discordBtn = new ItemStack(Material.BOOK);
         ItemMeta dm = discordBtn.getItemMeta();
         dm.setDisplayName(ChatColor.LIGHT_PURPLE + "Post Link Panel");
@@ -78,7 +74,6 @@ public class AdminGUI implements Listener, InventoryHolder {
         discordBtn.setItemMeta(dm);
         inventory.setItem(13, discordBtn);
 
-        // Button: Reload Config
         ItemStack reloadBtn = new ItemStack(Material.REDSTONE_TORCH);
         ItemMeta rlm = reloadBtn.getItemMeta();
         rlm.setDisplayName(ChatColor.RED + "Reload Config");
@@ -90,7 +85,6 @@ public class AdminGUI implements Listener, InventoryHolder {
     private void setupSelectorMenu() {
         fillGlass();
 
-        // Tier 1
         ItemStack t1 = new ItemStack(Material.EMERALD);
         ItemMeta m1 = t1.getItemMeta();
         m1.setDisplayName(ChatColor.GREEN + "Booster Tier 1");
@@ -98,7 +92,6 @@ public class AdminGUI implements Listener, InventoryHolder {
         t1.setItemMeta(m1);
         inventory.setItem(11, t1);
 
-        // Tier 2
         ItemStack t2 = new ItemStack(Material.NETHER_STAR);
         ItemMeta m2 = t2.getItemMeta();
         m2.setDisplayName(ChatColor.LIGHT_PURPLE + "Booster Tier 2");
@@ -108,7 +101,6 @@ public class AdminGUI implements Listener, InventoryHolder {
         t2.setItemMeta(m2);
         inventory.setItem(15, t2);
 
-        // Back
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta bm = back.getItemMeta();
         bm.setDisplayName(ChatColor.RED + "Back to Main Menu");
@@ -159,30 +151,35 @@ public class AdminGUI implements Listener, InventoryHolder {
             int slot = event.getSlot();
 
             if (gui.mode == GuiMode.MAIN_MENU) {
-                if (slot == 11) { // Edit Rewards -> Selector
+                if (slot == 11) {
                     new AdminGUI(plugin, GuiMode.REWARD_SELECTOR, null).open(player);
-                } else if (slot == 13) { // Post Panel
+                } else if (slot == 13) {
                     String channelId = plugin.getConfig().getString("panel.channel-id");
                     if (channelId == null || channelId.equals("000000000000000000")) {
-                        player.sendMessage(ChatColor.RED + "Please configure panel.channel-id in config.yml first!");
+                        player.sendMessage(ChatColor.RED + "Please configure panel.channel-id first!");
                         player.closeInventory();
                         return;
                     }
-                    player.sendMessage(ChatColor.YELLOW + "Posting link panel to Discord...");
+                    if (plugin.getDiscordBot() == null) {
+                        player.sendMessage(ChatColor.RED + "Discord bot is not initialized!");
+                        player.closeInventory();
+                        return;
+                    }
+                    player.sendMessage(ChatColor.YELLOW + "Posting link panel...");
                     plugin.getDiscordBot().postLinkPanel(channelId, player);
                     player.closeInventory();
-                } else if (slot == 15) { // Reload
+                } else if (slot == 15) {
                     plugin.reloadConfig();
                     plugin.getConfigManager().loadFullConfigs();
                     player.sendMessage(ChatColor.GREEN + "Configuration reloaded!");
                     player.closeInventory();
                 }
             } else if (gui.mode == GuiMode.REWARD_SELECTOR) {
-                if (slot == 11) { // Tier 1
+                if (slot == 11) {
                     new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster.items").open(player);
-                } else if (slot == 15) { // Tier 2
+                } else if (slot == 15) {
                     new AdminGUI(plugin, GuiMode.EDITOR, "rewards.booster_2.items").open(player);
-                } else if (slot == 22) { // Back
+                } else if (slot == 22) {
                     new AdminGUI(plugin).open(player);
                 }
             }
@@ -195,11 +192,9 @@ public class AdminGUI implements Listener, InventoryHolder {
             return;
         AdminGUI gui = (AdminGUI) event.getInventory().getHolder();
 
-        // Save only if looking at an editor
         if (gui.mode == GuiMode.EDITOR && gui.rewardPath != null) {
             saveRewards(event.getInventory(), gui.rewardPath);
-            event.getPlayer().sendMessage(ChatColor.GREEN + "Rewards saved for "
-                    + (gui.rewardPath.contains("booster_2") ? "Tier 2" : "Tier 1") + "!");
+            event.getPlayer().sendMessage(ChatColor.GREEN + "Rewards saved!");
         }
     }
 
@@ -210,10 +205,9 @@ public class AdminGUI implements Listener, InventoryHolder {
                 list.add(item.clone());
             }
         }
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtils.runAsync(plugin, () -> {
             plugin.getConfig().set(path, list);
             plugin.saveConfig();
-            // Update cache immediately
             plugin.getItemRewardHandler().refreshCache();
         });
     }

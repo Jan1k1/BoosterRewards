@@ -4,11 +4,12 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.core.PlayerData;
 
-public class RewardSyncTask extends BukkitRunnable {
+import java.util.Objects;
+
+public class RewardSyncTask implements Runnable {
 
     private final BoosterReward plugin;
 
@@ -34,41 +35,40 @@ public class RewardSyncTask extends BukkitRunnable {
             if (data == null || data.getDiscordId() == null)
                 continue;
 
-            String discordId = data.getDiscordId();
+            String discordId = Objects.requireNonNull(data.getDiscordId());
 
-            // Try to get from JDA cache first (very fast)
             Member member = guild.getMemberById(discordId);
             if (member != null) {
-                checkRewards(player, member);
+                syncSingle(player, member, guild);
             } else {
-                // Not in cache, fetch it (async)
-                guild.retrieveMemberById(discordId).queue(m -> {
-                    checkRewards(player, m);
-                }, error -> {
-                });
+                guild.retrieveMemberById(Objects.requireNonNull(discordId)).queue(m -> syncSingle(player, m, guild),
+                        error -> {
+                        });
             }
         }
     }
 
-    private void checkRewards(Player player, Member member) {
-        boolean isBooster = member.getTimeBoosted() != null;
-        int boostCount = 0;
-        if (isBooster) {
-            for (Member booster : member.getGuild().getBoosters()) {
-                if (booster.getId().equals(member.getId())) {
-                    boostCount++;
-                }
-            }
-        }
+    private void syncSingle(Player player, Member member, Guild guild) {
+        boolean isBoosting = member.getTimeBoosted() != null;
+        int boostCount = (int) guild.getBoosters().stream().filter(m -> m.getId().equals(member.getId())).count();
+        if (isBoosting && boostCount == 0)
+            boostCount = 1;
+
+        checkRewards(player, isBoosting, boostCount);
+    }
+
+    private void checkRewards(Player player, boolean isBooster, int boostCount) {
         plugin.getDatabaseManager().setBoosterStatus(player.getUniqueId(), isBooster, boostCount);
 
         if (isBooster) {
-            if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster")) {
-                plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
-            }
-            if (boostCount >= 2 && plugin.getConfig().getBoolean("rewards.booster_2.enabled", false)) {
-                if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster_2")) {
-                    plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
+            org.bukkit.configuration.ConfigurationSection tiers = plugin.getConfig().getConfigurationSection("rewards");
+            if (tiers != null) {
+                for (String tier : tiers.getKeys(false)) {
+                    if (plugin.getConfig().getBoolean("rewards." + tier + ".enabled", false)) {
+                        if (tier.equals("booster") || (tier.equals("booster_2") && boostCount >= 2)) {
+                            plugin.getRewardManager().giveReward(player.getUniqueId(), tier);
+                        }
+                    }
                 }
             }
         }

@@ -13,4 +13,3 @@ public class EmptyTabCompleter implements TabCompleter {
         return Collections.emptyList();
     }
 }
-

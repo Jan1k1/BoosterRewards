@@ -1,11 +1,11 @@
 package studio.jan1k.boosterrewards.core;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.utils.Logs;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
@@ -29,7 +29,6 @@ public class ItemRewardHandler {
         rewardCache.clear();
         loadTierToCache("booster");
         loadTierToCache("booster_2");
-        // Support custom tiers if added in future
         if (plugin.getConfig().getConfigurationSection("rewards") != null) {
             for (String tier : plugin.getConfig().getConfigurationSection("rewards").getKeys(false)) {
                 if (!rewardCache.containsKey(tier)) {
@@ -77,12 +76,23 @@ public class ItemRewardHandler {
         UUID uuid = player.getUniqueId();
         String playerName = player.getName();
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            for (ItemStack item : items) {
+        SchedulerUtils.runAsync(plugin, () -> {
+            for (int i = 0; i < items.size(); i++) {
+                ItemStack item = items.get(i);
                 try {
                     Map<String, Object> itemMap = ItemSerializer.serialize(item);
                     String json = mapper.writeValueAsString(itemMap);
-                    plugin.getDatabaseManager().addPendingReward(uuid, json, tier);
+
+                    String hashInput = tier + ":" + i + ":" + json;
+                    String itemHash = java.util.Base64.getEncoder().encodeToString(
+                            java.security.MessageDigest.getInstance("MD5").digest(hashInput.getBytes()));
+
+                    if (plugin.getDatabaseManager().isItemAlreadyClaimed(uuid, itemHash) ||
+                            plugin.getDatabaseManager().hasPendingItem(uuid, itemHash)) {
+                        continue;
+                    }
+
+                    plugin.getDatabaseManager().addPendingReward(uuid, json, tier, itemHash);
                 } catch (Exception e) {
                     Logs.error("Failed to queue reward item for " + playerName + ": " + e.getMessage());
                 }

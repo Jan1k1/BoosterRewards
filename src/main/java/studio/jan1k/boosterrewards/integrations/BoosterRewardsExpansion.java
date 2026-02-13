@@ -1,7 +1,7 @@
 package studio.jan1k.boosterrewards.integrations;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import studio.jan1k.boosterrewards.BoosterReward;
 
@@ -20,12 +20,12 @@ public class BoosterRewardsExpansion extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getAuthor() {
-        return "jan1k";
+        return "Jan1k";
     }
 
     @Override
     public @NotNull String getVersion() {
-        return plugin.getDescription().getVersion();
+        return "0.0.1";
     }
 
     @Override
@@ -34,25 +34,22 @@ public class BoosterRewardsExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String onRequest(OfflinePlayer player, @NotNull String params) {
-        if (player == null)
+    public String onPlaceholderRequest(Player player, @NotNull String identifier) {
+        if (player == null) {
             return "";
-
-        if (params.equalsIgnoreCase("linked")) {
-            return plugin.getDatabaseManager().getDiscordId(player.getUniqueId()) != null ? "yes" : "no";
         }
 
-        if (params.equalsIgnoreCase("discord_id")) {
-            String id = plugin.getDatabaseManager().getDiscordId(player.getUniqueId());
-            return id != null ? id : "None";
+        if (identifier.equals("is_boosting")) {
+            return String.valueOf(plugin.getDatabaseManager().isBoosting(player.getUniqueId()));
         }
 
-        if (params.equalsIgnoreCase("is_booster")) {
-            // This is a simplified check. We'd ideally check if active in DB.
-            // For now, let's check if they have a non-zero boost start in boosters table
-            // or use the count logic.
-            return plugin.getDatabaseManager()
-                    .getUuid(plugin.getDatabaseManager().getDiscordId(player.getUniqueId())) != null ? "yes" : "no";
+        if (identifier.equals("boost_count")) {
+            return String.valueOf(plugin.getDatabaseManager().getBoostCount(player.getUniqueId()));
+        }
+
+        if (identifier.equals("discord_id")) {
+            String discordId = plugin.getDatabaseManager().getDiscordId(player.getUniqueId());
+            return discordId != null ? discordId : "Not Linked";
         }
 
         return null;

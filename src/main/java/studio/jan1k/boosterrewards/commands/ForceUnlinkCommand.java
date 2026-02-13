@@ -24,15 +24,15 @@ public class ForceUnlinkCommand implements CommandExecutor {
         }
 
         if (args.length != 1) {
-            sender.sendMessage(ChatColor.RED + "Usage: /" + label + " <player>");
+            sender.sendMessage(ChatColor.RED + "Usage: /forceunlink <player>");
             return true;
         }
 
         String targetName = args[0];
-        // Deprecated but standard for offline players by name lookup in Spigot
+        @SuppressWarnings("deprecation")
         org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(targetName);
 
-        if (target == null) {
+        if (target == null || target.getUniqueId() == null) {
             sender.sendMessage(ChatColor.RED + "Player not found.");
             return true;
         }
@@ -41,13 +41,12 @@ public class ForceUnlinkCommand implements CommandExecutor {
         String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
 
         if (discordId == null) {
-            sender.sendMessage(ChatColor.RED + targetName + " is not linked to any Discord account.");
+            sender.sendMessage(ChatColor.RED + targetName + " is not linked.");
             return true;
         }
 
         plugin.getDatabaseManager().removeUser(uuid);
         plugin.removeCachedPlayer(uuid);
-
         sender.sendMessage(ChatColor.GREEN + "Successfully unlinked " + targetName + ".");
 
         if (target.isOnline()) {

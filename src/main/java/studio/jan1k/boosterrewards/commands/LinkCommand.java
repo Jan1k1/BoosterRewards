@@ -4,7 +4,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,8 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.core.LinkManager;
-
-import java.util.UUID;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 
 public class LinkCommand implements CommandExecutor {
 
@@ -34,10 +32,7 @@ public class LinkCommand implements CommandExecutor {
         String mode = plugin.getConfig().getString("linking.mode", "MINECRAFT_TO_DISCORD");
 
         if (mode.equalsIgnoreCase("MINECRAFT_TO_DISCORD")) {
-            // Mode: MC -> Discord
-            // Usage: /link (generates code)
-
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            SchedulerUtils.runAsync(plugin, () -> {
                 if (plugin.getDatabaseManager().getDiscordId(player.getUniqueId()) != null) {
                     String msg = plugin.getConfig().getString("messages.in-game.link.already-linked",
                             "&cYou are already linked! Use /logout to unlink.");
@@ -71,9 +66,6 @@ public class LinkCommand implements CommandExecutor {
             });
 
         } else {
-            // Mode: Discord -> MC
-            // Usage: /link <code>
-
             if (args.length != 1) {
                 String msg = plugin.getConfig().getString("messages.in-game.link.usage", "&cUsage: /link <code>");
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
@@ -82,8 +74,7 @@ public class LinkCommand implements CommandExecutor {
 
             String code = args[0];
 
-            // Run everything else ASYNC to prevent main-thread lag
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            SchedulerUtils.runAsync(plugin, () -> {
                 if (plugin.getDatabaseManager().getDiscordId(player.getUniqueId()) != null) {
                     String msg = plugin.getConfig().getString("messages.in-game.link.already-linked",
                             "&cYou are already linked! Use /logout to unlink.");
@@ -95,7 +86,6 @@ public class LinkCommand implements CommandExecutor {
                 String discordInfo = linkManager.getDiscordInfo(code);
 
                 if (discordInfo == null) {
-                    // String msg = plugin.getConfigManager().getInGameMessage("link.invalid-code");
                     String msg = plugin.getConfig().getString("messages.in-game.link.invalid-code",
                             "&cInvalid or expired link code.");
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
@@ -106,23 +96,15 @@ public class LinkCommand implements CommandExecutor {
                 String discordId = parts[0];
                 String username = parts[1];
 
-                // DB check for existing discord ID
                 if (plugin.getDatabaseManager().getUuid(discordId) != null) {
                     player.sendMessage(ChatColor.RED + "This Discord account is already linked to another player.");
                     return;
                 }
 
-                // Save to DB
-                // Save Logic needs to ensure UUID is unique too, mostly handled by DB
-                // constraints or getDiscordId check above
                 plugin.getDatabaseManager().saveUser(player.getUniqueId(), discordId);
-
-                // Update Cache
                 plugin.cachePlayer(player.getUniqueId(), discordId);
-
                 linkManager.invalidateCode(code);
 
-                // String msg = plugin.getConfigManager().getInGameMessage("link.success")
                 String msg = plugin.getConfig()
                         .getString("messages.in-game.link.success",
                                 "&aSuccessfully linked with Discord user &f%discord_user%&a!")

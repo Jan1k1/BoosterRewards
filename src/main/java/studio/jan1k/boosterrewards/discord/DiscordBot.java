@@ -87,14 +87,14 @@ public class DiscordBot extends ListenerAdapter {
         Guild guild = member.getGuild();
         boolean isNowBoosting = member.getTimeBoosted() != null;
 
-        // Calculate boost count: JDA Member doesn't have getBoostCount(),
-        // but Guild.getBoosters() contains a Member for each active boost.
         int boostCount = 0;
         for (Member booster : guild.getBoosters()) {
             if (booster.getId().equals(discordId)) {
                 boostCount++;
             }
         }
+        if (isNowBoosting && boostCount == 0)
+            boostCount = 1;
 
         UUID uuid = plugin.getDatabaseManager().getUuid(discordId);
         if (uuid == null)
@@ -107,7 +107,6 @@ public class DiscordBot extends ListenerAdapter {
                     System.currentTimeMillis(), boostCount);
             plugin.getRewardManager().giveReward(uuid, "booster");
 
-            // If they have 2+ boosts, also give tier 2
             if (boostCount >= 2 && plugin.getConfig().getBoolean("rewards.booster_2.enabled", false)) {
                 plugin.getRewardManager().giveReward(uuid, "booster_2");
             }
@@ -122,12 +121,10 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     private void announceBoost(Member member, UUID uuid) {
-        // Boost announcements are handled by RewardManager/Commands now if enabled,
-        // or disabled as per user request to remove specific channels.
     }
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         String cmd = event.getName();
 
         switch (cmd) {
@@ -144,7 +141,7 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     @Override
-    public void onButtonInteraction(ButtonInteractionEvent event) {
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         if (!event.getComponentId().equals("link_account"))
             return;
 
@@ -169,8 +166,6 @@ public class DiscordBot extends ListenerAdapter {
                     .queue();
             Logs.info("[Link] Button: Generated code " + code + " for " + username);
         } else {
-            // MINECRAFT_TO_DISCORD: Open modal for code entry using Label container (JDA
-            // 6.3.0 logic)
             TextInput codeInput = TextInput.create("link_code", TextInputStyle.SHORT)
                     .setPlaceholder("Enter the code from /link in-game")
                     .setMinLength(4)
@@ -178,7 +173,6 @@ public class DiscordBot extends ListenerAdapter {
                     .setRequired(true)
                     .build();
 
-            // In JDA 6.3.0, TextInput is wrapped in Label and added directly to Modal
             Label labeledInput = Label.of("link_code_label", "Minecraft Link Code", codeInput);
 
             Modal modal = Modal.create("link_modal", "Link Your Minecraft Account")
@@ -190,10 +184,12 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     @Override
-    public void onModalInteraction(ModalInteractionEvent event) {
+    public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         if (!event.getModalId().equals("link_modal"))
             return;
 
+        if (event.getValue("link_code") == null)
+            return;
         String code = event.getValue("link_code").getAsString().toUpperCase();
         String discordId = event.getUser().getId();
 
@@ -229,8 +225,9 @@ public class DiscordBot extends ListenerAdapter {
             org.bukkit.entity.Player player = org.bukkit.Bukkit.getPlayer(uuid);
             if (player != null) {
                 player.sendMessage(org.bukkit.ChatColor.GREEN + "✓ Your Discord account has been linked!");
-                // Trigger immediate boost check
-                handleBoostUpdate(event.getGuild().getMemberById(discordId));
+                if (event.getGuild() != null) {
+                    handleBoostUpdate(event.getGuild().getMemberById(discordId));
+                }
             }
         } else {
             event.reply("Invalid code type. Please use the code generated in Minecraft.")

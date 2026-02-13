@@ -2,141 +2,75 @@ package studio.jan1k.boosterrewards.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import studio.jan1k.boosterrewards.BoosterReward;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.util.concurrent.CompletableFuture;
+import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class UpdateChecker implements Listener {
 
     private final BoosterReward plugin;
-    private final String modrinthId = "h34wc4II";
-    private final String githubRepo = "Jan1k1/BoosterRewards";
+    private final int resourceId;
     private String latestVersion;
-    private boolean updateAvailable = false;
 
-    public UpdateChecker(BoosterReward plugin) {
+    public UpdateChecker(BoosterReward plugin, int resourceId) {
         this.plugin = plugin;
-        checkForUpdates();
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        this.resourceId = resourceId;
     }
 
-    private void checkForUpdates() {
-        CompletableFuture.runAsync(() -> {
-            try {
-                // Try Modrinth First
-                String version = getModrinthVersion();
-                if (version == null) {
-                    // Fallback to GitHub
-                    version = getGithubVersion();
+    public void getVersion(final Consumer<String> consumer) {
+        SchedulerUtils.runAsync(plugin, () -> {
+            try (InputStream inputStream = new URL(
+                    "https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId)
+                    .openStream(); Scanner scanner = new Scanner(inputStream)) {
+                if (scanner.hasNext()) {
+                    consumer.accept(scanner.next());
                 }
-
-                if (version != null) {
-                    latestVersion = version;
-                    String currentVersion = plugin.getDescription().getVersion();
-                    // Simple version comparison (removes 'v' prefix if present)
-                    String cleanLatest = latestVersion.replace("v", "");
-                    String cleanCurrent = currentVersion.replace("v", "");
-
-                    if (!cleanLatest.equalsIgnoreCase(cleanCurrent)) {
-                        updateAvailable = true;
-                        Logs.warn("A new version of BoosterRewards is available: " + latestVersion);
-                        Logs.warn("Download it at: https://modrinth.com/plugin/boosterrewards");
-                    }
-                }
-            } catch (Exception e) {
-                Logs.error("Failed to check for updates: " + e.getMessage());
+            } catch (IOException exception) {
+                Logs.error("Unable to check for updates: " + exception.getMessage());
             }
         });
     }
 
-    private String getModrinthVersion() {
-        try {
-            URL url = new URL("https://api.modrinth.com/v2/project/" + modrinthId + "/version");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
+    public void check() {
+        if (!plugin.getConfig().getBoolean("features.update-checker", true))
+            return;
 
-            if (connection.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
+        getVersion(version -> {
+            this.latestVersion = version;
+            String currentVersion = plugin.getDescription().getVersion();
 
-                // Parse JSON manually to avoid Gson/Jackson complexity if possible,
-                // but we have Gson shaded in plugin. Assume simple search for "version_number"
-                String json = response.toString();
-                // Extremely basic parsing to get the first version_number
-                // ("version_number":"x.x.x")
-                int index = json.indexOf("\"version_number\":\"");
-                if (index != -1) {
-                    int start = index + 18;
-                    int end = json.indexOf("\"", start);
-                    return json.substring(start, end);
-                }
+            if (currentVersion.equalsIgnoreCase(version)) {
+                Logs.success("You are running the latest version!");
+            } else {
+                Logs.warn("A new update is available: v" + version);
+                Logs.warn("Download it here: https://www.spigotmc.org/resources/" + resourceId);
             }
-        } catch (Exception e) {
-            // Modrinth failed, return null to try GitHub
-            return null;
-        }
-        return null;
-    }
+        });
 
-    private String getGithubVersion() {
-        try {
-            URL url = new URL("https://api.github.com/repos/" + githubRepo + "/releases/latest");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-
-            if (connection.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-
-                String json = response.toString();
-                int index = json.indexOf("\"tag_name\":\"");
-                if (index != -1) {
-                    int start = index + 12;
-                    int end = json.indexOf("\"", start);
-                    return json.substring(start, end);
-                }
-            }
-        } catch (Exception e) {
-            return null;
-        }
-        return null;
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (!updateAvailable)
+        Player player = event.getPlayer();
+
+        if (latestVersion == null || !player.hasPermission("boosterrewards.admin"))
             return;
-        if (event.getPlayer().hasPermission("boosterrewards.admin")) {
-            event.getPlayer().sendMessage(ChatColor.GRAY + "--------------------------------------------------");
-            event.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE + "BoosterRewards " + ChatColor.GRAY + "» "
-                    + ChatColor.GREEN + "A new update is available!");
-            event.getPlayer().sendMessage(
-                    ChatColor.GRAY + "Current version: " + ChatColor.RED + plugin.getDescription().getVersion());
-            event.getPlayer().sendMessage(ChatColor.GRAY + "New version: " + ChatColor.GREEN + latestVersion);
-            event.getPlayer().sendMessage(
-                    ChatColor.GRAY + "Download: " + ChatColor.AQUA + "https://modrinth.com/plugin/boosterrewards");
-            event.getPlayer().sendMessage(ChatColor.GRAY + "--------------------------------------------------");
+
+        String currentVersion = plugin.getDescription().getVersion();
+        if (!currentVersion.equalsIgnoreCase(latestVersion)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&d&lBoosterRewards &8» &7A new update is available! &f(v" + latestVersion + ")"));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&d&lBoosterRewards &8» &7Download: &f&nhttps://www.spigotmc.org/resources/" + resourceId));
         }
     }
 }

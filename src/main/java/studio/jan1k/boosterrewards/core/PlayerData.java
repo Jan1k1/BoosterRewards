@@ -3,16 +3,24 @@ package studio.jan1k.boosterrewards.core;
 import java.util.UUID;
 
 public class PlayerData {
+
     private final UUID uuid;
-    private String discordId;
-    private boolean boosting;
-    private long lastCheck;
+    private final String discordId;
+    private boolean isBoosting;
+    private int boostCount;
 
     public PlayerData(UUID uuid, String discordId) {
         this.uuid = uuid;
         this.discordId = discordId;
-        this.boosting = false;
-        this.lastCheck = 0;
+        this.isBoosting = false;
+        this.boostCount = 0;
+    }
+
+    public PlayerData(UUID uuid, String discordId, boolean isBoosting, int boostCount) {
+        this.uuid = uuid;
+        this.discordId = discordId;
+        this.isBoosting = isBoosting;
+        this.boostCount = boostCount;
     }
 
     public UUID getUuid() {
@@ -23,24 +31,19 @@ public class PlayerData {
         return discordId;
     }
 
-    public void setDiscordId(String discordId) {
-        this.discordId = discordId;
-    }
-
     public boolean isBoosting() {
-        return boosting;
+        return isBoosting;
     }
 
     public void setBoosting(boolean boosting) {
-        this.boosting = boosting;
+        isBoosting = boosting;
     }
 
-    public long getLastCheck() {
-        return lastCheck;
+    public int getBoostCount() {
+        return boostCount;
     }
 
-    public void setLastCheck(long lastCheck) {
-        this.lastCheck = lastCheck;
+    public void setBoostCount(int boostCount) {
+        this.boostCount = boostCount;
     }
 }
-

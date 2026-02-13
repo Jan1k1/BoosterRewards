@@ -2,6 +2,7 @@ name: BoosterRewards
 version: ${version}
 main: studio.jan1k.boosterrewards.BoosterReward
 api-version: '1.21'
+folia-supported: true
 prefix: BoosterRewards
 authors: [jan1k]
 description: Discord Boosting Reward System

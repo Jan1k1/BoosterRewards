@@ -27,12 +27,6 @@ public class LinkManager {
     }
 
     public String generateMinecraftCode(java.util.UUID uuid, String username) {
-        // Check if existing code (could map UUID -> Code if needed, but simple map
-        // suffices)
-        // For simplicity, just generate a new one or check existing
-        // Better implementation: bidirectional map for UUID too.
-        // But for now, just generate new one.
-
         String code = generateRandomCode();
         while (codeToDiscordInfo.containsKey(code)) {
             code = generateRandomCode();
@@ -46,13 +40,11 @@ public class LinkManager {
         return codeToDiscordInfo.get(code);
     }
 
-    // Deprecated but kept for compatibility during refactor
     public String getDiscordInfo(String code) {
         String info = codeToDiscordInfo.get(code);
         if (info != null && info.startsWith("DISCORD:")) {
-            return info.substring(8); // Remove prefix
+            return info.substring(8);
         }
-        // Fallback for old codes if any (unlikely due to restart)
         return info;
     }
 
@@ -72,4 +64,3 @@ public class LinkManager {
         return sb.toString();
     }
 }
-

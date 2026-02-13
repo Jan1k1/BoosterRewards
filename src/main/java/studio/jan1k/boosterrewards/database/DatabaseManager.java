@@ -90,7 +90,6 @@ public class DatabaseManager {
                 stmt.execute();
             }
 
-            // Alter table for existing installations
             try (PreparedStatement stmt = conn.prepareStatement(
                     "ALTER TABLE " + tablePrefix + "boosters ADD COLUMN IF NOT EXISTS boost_count INT DEFAULT 1")) {
                 stmt.execute();
@@ -115,30 +114,87 @@ public class DatabaseManager {
                             "PRIMARY KEY (uuid, reward_type))")) {
                 stmt.execute();
             }
+
+            try (PreparedStatement stmt = conn
+                    .prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + "claimed_items (" +
+                            "uuid VARCHAR(36) NOT NULL, " +
+                            "item_hash VARCHAR(64) NOT NULL, " +
+                            "claimed_at BIGINT NOT NULL, " +
+                            "PRIMARY KEY (uuid, item_hash))")) {
+                stmt.execute();
+            }
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "ALTER TABLE " + tablePrefix + "pending_rewards ADD COLUMN IF NOT EXISTS item_hash VARCHAR(64)")) {
+                stmt.execute();
+            } catch (SQLException ignored) {
+            }
         } catch (SQLException e) {
             Logs.error("Failed to initialize database tables!");
             e.printStackTrace();
         }
     }
 
-    public void addPendingReward(UUID uuid, String rewardData, String rewardType) {
+    public void addPendingReward(UUID uuid, String rewardData, String rewardType, String itemHash) {
         String sql = "INSERT INTO " + tablePrefix
-                + "pending_rewards (uuid, reward_data, reward_type, created_at) VALUES (?, ?, ?, ?)";
+                + "pending_rewards (uuid, reward_data, reward_type, item_hash, created_at) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
             stmt.setString(2, rewardData);
             stmt.setString(3, rewardType);
-            stmt.setLong(4, System.currentTimeMillis());
+            stmt.setString(4, itemHash);
+            stmt.setLong(5, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    public class PendingReward {
+        private final int id;
+        private final UUID uuid;
+        private final String rewardData;
+        private final String rewardType;
+        private final String itemHash;
+        private final long createdAt;
+
+        public PendingReward(int id, UUID uuid, String rewardData, String rewardType, String itemHash, long createdAt) {
+            this.id = id;
+            this.uuid = uuid;
+            this.rewardData = rewardData;
+            this.rewardType = rewardType;
+            this.itemHash = itemHash;
+            this.createdAt = createdAt;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public UUID getUuid() {
+            return uuid;
+        }
+
+        public String getRewardData() {
+            return rewardData;
+        }
+
+        public String getRewardType() {
+            return rewardType;
+        }
+
+        public String getItemHash() {
+            return itemHash;
+        }
+
+        public long getCreatedAt() {
+            return createdAt;
+        }
+    }
+
     public List<PendingReward> getPendingRewards(UUID uuid) {
         List<PendingReward> rewards = new ArrayList<>();
-        String sql = "SELECT id, reward_data, reward_type, created_at FROM " + tablePrefix
+        String sql = "SELECT id, reward_data, reward_type, item_hash, created_at FROM " + tablePrefix
                 + "pending_rewards WHERE uuid = ?";
         try (Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -150,6 +206,7 @@ public class DatabaseManager {
                             uuid,
                             rs.getString("reward_data"),
                             rs.getString("reward_type"),
+                            rs.getString("item_hash"),
                             rs.getLong("created_at")));
                 }
             }
@@ -221,39 +278,46 @@ public class DatabaseManager {
         }
     }
 
-    public static class PendingReward {
-        private final int id;
-        private final UUID uuid;
-        private final String rewardData;
-        private final String rewardType;
-        private final long createdAt;
-
-        public PendingReward(int id, UUID uuid, String rewardData, String rewardType, long createdAt) {
-            this.id = id;
-            this.uuid = uuid;
-            this.rewardData = rewardData;
-            this.rewardType = rewardType;
-            this.createdAt = createdAt;
+    public boolean isItemAlreadyClaimed(UUID uuid, String itemHash) {
+        String sql = "SELECT 1 FROM " + tablePrefix + "claimed_items WHERE uuid = ? AND item_hash = ?";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, itemHash);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return false;
+    }
 
-        public int getId() {
-            return id;
+    public boolean hasPendingItem(UUID uuid, String itemHash) {
+        String sql = "SELECT 1 FROM " + tablePrefix + "pending_rewards WHERE uuid = ? AND item_hash = ?";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, itemHash);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return false;
+    }
 
-        public UUID getUuid() {
-            return uuid;
-        }
-
-        public String getRewardData() {
-            return rewardData;
-        }
-
-        public String getRewardType() {
-            return rewardType;
-        }
-
-        public long getCreatedAt() {
-            return createdAt;
+    public void addItemClaimRecord(UUID uuid, String itemHash) {
+        String sql = "INSERT INTO " + tablePrefix + "claimed_items (uuid, item_hash, claimed_at) VALUES (?, ?, ?)";
+        try (Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, itemHash);
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -289,6 +353,8 @@ public class DatabaseManager {
     }
 
     public void saveBooster(String discordId, UUID uuid, String username, long boostStart, int boostCount) {
+        if (boostCount < 1)
+            boostCount = 1;
         String sql = "INSERT INTO " + tablePrefix
                 + "boosters (discord_id, uuid, username, boost_start, boost_count, is_active, last_checked) "
                 + "VALUES (?, ?, ?, ?, ?, TRUE, ?) "
@@ -332,6 +398,8 @@ public class DatabaseManager {
             return;
 
         if (isBooster) {
+            if (boostCount < 1)
+                boostCount = 1;
             String sql = "INSERT INTO " + tablePrefix
                     + "boosters (discord_id, uuid, boost_count, is_active, last_checked, boost_start, username) "
                     + "VALUES (?, ?, ?, TRUE, ?, ?, 'Unknown') "
@@ -349,7 +417,7 @@ public class DatabaseManager {
                 stmt.setString(2, uuid.toString());
                 stmt.setInt(3, boostCount);
                 stmt.setLong(4, System.currentTimeMillis());
-                stmt.setLong(5, System.currentTimeMillis()); // Use current time as boost_start if new
+                stmt.setLong(5, System.currentTimeMillis());
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -455,13 +523,14 @@ public class DatabaseManager {
         if (discordId == null)
             return false;
 
-        String sql = "SELECT is_active FROM " + tablePrefix + "boosters WHERE discord_id = ?";
+        String sql = "SELECT is_active, boost_count FROM " + tablePrefix + "boosters WHERE discord_id = ?";
         try (Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, discordId);
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next())
-                    return rs.getBoolean("is_active");
+                if (rs.next()) {
+                    return rs.getBoolean("is_active") && rs.getInt("boost_count") > 0;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

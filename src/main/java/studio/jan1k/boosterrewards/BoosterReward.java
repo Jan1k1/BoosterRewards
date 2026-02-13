@@ -20,6 +20,7 @@ import studio.jan1k.boosterrewards.gui.AdminGUI;
 import studio.jan1k.boosterrewards.gui.ClaimGUI;
 import studio.jan1k.boosterrewards.tasks.RewardSyncTask;
 import studio.jan1k.boosterrewards.utils.Logs;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 
 public class BoosterReward extends JavaPlugin {
 
@@ -52,29 +53,35 @@ public class BoosterReward extends JavaPlugin {
         configManager = new ConfigManager(this);
         saveDefaultConfig();
         configManager.loadFullConfigs();
-        // The instruction implies a reload functionality, which would typically be
-        // handled by a command.
-        // The provided snippet seems to be from a reload command context.
-        // Since this is onEnable, the initial load is handled by loadCoreModules().
-        // If a reload command exists, it should call configManager.loadFullConfigs()
-        // and itemRewardHandler.refreshCache().
-        // For now, we ensure refreshCache is called during initial setup via
-        // loadCoreModules().
 
+        initializeDiscordBot();
         loadCoreModules();
+    }
+
+    public void initializeDiscordBot() {
+        shutdownDiscordBot();
 
         String discordToken = configManager.getDiscordToken();
         if (discordToken == null || discordToken.equals("YOUR_BOT_TOKEN_HERE") || discordToken.isEmpty()) {
             Logs.warn("Discord Bot Token is not configured. Discord features will be disabled.");
             Logs.warn("Please set your bot token in discord.yml and reload.");
-        } else {
-            String guildId = configManager.getDiscordGuildId();
-            if (guildId == null || guildId.equals("000000000000000000") || guildId.isEmpty()) {
-                Logs.warn("Discord Guild ID is not configured. Discord features will be disabled.");
-                Logs.warn("Please set your guild-id in discord.yml and reload.");
-            } else {
-                this.discordBot = new DiscordBot(this, linkManager);
-            }
+            return;
+        }
+
+        String guildId = configManager.getDiscordGuildId();
+        if (guildId == null || guildId.equals("000000000000000000") || guildId.isEmpty()) {
+            Logs.warn("Discord Guild ID is not configured. Discord features will be disabled.");
+            Logs.warn("Please set your guild-id in discord.yml and reload.");
+            return;
+        }
+
+        this.discordBot = new DiscordBot(this, linkManager);
+    }
+
+    public void shutdownDiscordBot() {
+        if (this.discordBot != null) {
+            this.discordBot.stop();
+            this.discordBot = null;
         }
     }
 
@@ -98,8 +105,8 @@ public class BoosterReward extends JavaPlugin {
 
         registerCommands();
 
-        new RewardSyncTask(this).runTaskTimerAsynchronously(this, 100L,
-                getConfig().getLong("sync.interval", 300) * 20L);
+        long interval = getConfig().getLong("sync.interval", 300) * 20L;
+        SchedulerUtils.runTimer(this, new RewardSyncTask(this)::run, 100L, interval);
 
         getServer().getPluginManager().registerEvents(new AdminGUI(this), this);
         getServer().getPluginManager().registerEvents(new ClaimGUI(this), this);
@@ -125,7 +132,7 @@ public class BoosterReward extends JavaPlugin {
         }
 
         if (getConfig().getBoolean("features.update-checker", true)) {
-            new studio.jan1k.boosterrewards.utils.UpdateChecker(this);
+            new studio.jan1k.boosterrewards.utils.UpdateChecker(this, 118476).check();
         }
     }
 
@@ -152,9 +159,11 @@ public class BoosterReward extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (discordBot != null) {
-            discordBot.stop();
+        shutdownDiscordBot();
+        if (databaseManager != null) {
+            databaseManager.close();
         }
+        Logs.info("Plugin disabled successfully.");
     }
 
     private void printBanner() {
@@ -190,7 +199,7 @@ public class BoosterReward extends JavaPlugin {
             return;
 
         Logs.info("Verifying active boosters status with Discord...");
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+        SchedulerUtils.runAsync(this, () -> {
             java.util.List<String> activeIds = databaseManager.getAllActiveBoosters();
             String guildId = configManager.getDiscordGuildId();
             net.dv8tion.jda.api.entities.Guild guild = discordBot.getJDA().getGuildById(guildId);
@@ -206,27 +215,29 @@ public class BoosterReward extends JavaPlugin {
                         continue;
 
                     boolean isBoosting = member.getTimeBoosted() != null;
-
-                    int boostCount = 0;
-                    if (isBoosting) {
-                        for (net.dv8tion.jda.api.entities.Member booster : guild.getBoosters()) {
-                            if (booster.getId().equals(discordId)) {
-                                boostCount++;
-                            }
-                        }
-                    }
+                    int boostCount = (int) guild.getBoosters().stream().filter(m -> m.getId().equals(discordId))
+                            .count();
+                    if (isBoosting && boostCount == 0)
+                        boostCount = 1;
 
                     UUID uuid = databaseManager.getUuid(discordId);
                     if (uuid != null) {
                         databaseManager.setBoosterStatus(uuid, isBoosting, boostCount);
 
                         if (isBoosting) {
-                            if (!databaseManager.hasAlreadyClaimed(uuid, "booster")) {
-                                rewardManager.giveReward(uuid, "booster");
-                            }
-                            if (boostCount >= 2 && getConfig().getBoolean("rewards.booster_2.enabled", false)) {
-                                if (!databaseManager.hasAlreadyClaimed(uuid, "booster_2")) {
-                                    rewardManager.giveReward(uuid, "booster_2");
+                            org.bukkit.configuration.ConfigurationSection tiers = getConfig()
+                                    .getConfigurationSection("rewards");
+                            if (tiers != null) {
+                                for (String tier : tiers.getKeys(false)) {
+                                    if (getConfig().getBoolean("rewards." + tier + ".enabled", false)) {
+                                        if (!databaseManager.hasAlreadyClaimed(uuid, tier)) {
+                                            if (tier.equals("booster")
+                                                    || (tier.equals("booster_2") && boostCount >= 2)) {
+                                                rewardManager.giveReward(uuid, tier);
+                                                databaseManager.addClaimRecord(uuid, tier);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

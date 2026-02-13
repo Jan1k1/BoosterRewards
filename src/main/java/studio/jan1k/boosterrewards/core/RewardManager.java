@@ -18,27 +18,23 @@ public class RewardManager {
 
     public void giveReward(UUID uuid, String tier) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            // Check if player already has rewards of this tier pending or already claimed
-            if (plugin.getDatabaseManager().hasPendingReward(uuid, tier) ||
-                    plugin.getDatabaseManager().hasAlreadyClaimed(uuid, tier)) {
-                return;
-            }
+            boolean alreadyClaimed = plugin.getDatabaseManager().hasAlreadyClaimed(uuid, tier);
 
             List<String> commands = plugin.getConfig().getStringList("rewards." + tier + ".on-boost");
             String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
 
-            // Execute commands on main thread
             Bukkit.getScheduler().runTask(plugin, () -> {
                 Player player = Bukkit.getPlayer(uuid);
                 if (player == null)
                     return;
 
-                // 1. Run Commands
-                for (String cmd : commands) {
-                    executeCommand(player, cmd, discordId);
+                if (!alreadyClaimed) {
+                    for (String cmd : commands) {
+                        executeCommand(player, cmd, discordId);
+                    }
+                    plugin.getDatabaseManager().addClaimRecord(uuid, tier);
                 }
 
-                // 2. Queue Custom Items as pending rewards
                 plugin.getItemRewardHandler().queueItemRewards(player, tier);
             });
         });

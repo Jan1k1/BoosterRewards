@@ -1,12 +1,12 @@
 package studio.jan1k.boosterrewards.commands;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import studio.jan1k.boosterrewards.BoosterReward;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 
 public class ClaimCommand implements CommandExecutor {
 
@@ -25,7 +25,6 @@ public class ClaimCommand implements CommandExecutor {
 
         Player player = (Player) sender;
 
-        // 1. Check if linked
         String discordId = plugin.getDatabaseManager().getDiscordId(player.getUniqueId());
         if (discordId == null) {
             player.sendMessage(ChatColor.RED + "❌ You must link your account before you can claim rewards!");
@@ -33,20 +32,7 @@ public class ClaimCommand implements CommandExecutor {
             return true;
         }
 
-        // 1.5 Check if already claimed all available tiers
-        boolean claimed1 = plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster");
-        boolean tier2Enabled = plugin.getConfig().getBoolean("rewards.booster_2.enabled", false);
-        boolean claimed2 = !tier2Enabled
-                || plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster_2");
-
-        if (claimed1 && claimed2) {
-            player.sendMessage(ChatColor.YELLOW + "✅ You have already claimed all your booster rewards!");
-            return true;
-        }
-
-        // 2. Check if boosting (with a quick sync check if record is negative)
         if (!plugin.getDatabaseManager().isBoosting(player.getUniqueId())) {
-            // Attempt a quick sync from Discord before failing
             syncAndOpenGUI(player, discordId);
             return true;
         }
@@ -57,6 +43,10 @@ public class ClaimCommand implements CommandExecutor {
     }
 
     private void syncAndOpenGUI(Player player, String discordId) {
+        if (plugin.getDiscordBot() == null || plugin.getDiscordBot().getJDA() == null) {
+            player.sendMessage(ChatColor.RED + "❌ Could not verify your boost status. Discord bot is not connected.");
+            return;
+        }
         String guildId = plugin.getConfigManager().getDiscordGuildId();
         net.dv8tion.jda.api.entities.Guild guild = plugin.getDiscordBot().getJDA().getGuildById(guildId);
 
@@ -84,18 +74,14 @@ public class ClaimCommand implements CommandExecutor {
             final int finalBoostCount = boostCount;
             plugin.getDatabaseManager().setBoosterStatus(player.getUniqueId(), isBoosting, finalBoostCount);
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtils.runSync(plugin, () -> {
                 if (!player.isOnline())
                     return;
 
                 if (isBoosting) {
-                    if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster")) {
-                        plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
-                    }
+                    plugin.getRewardManager().giveReward(player.getUniqueId(), "booster");
                     if (finalBoostCount >= 2 && plugin.getConfig().getBoolean("rewards.booster_2.enabled", false)) {
-                        if (!plugin.getDatabaseManager().hasAlreadyClaimed(player.getUniqueId(), "booster_2")) {
-                            plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
-                        }
+                        plugin.getRewardManager().giveReward(player.getUniqueId(), "booster_2");
                     }
                     new studio.jan1k.boosterrewards.gui.ClaimSelectorGUI(plugin, player, finalBoostCount);
                 } else {
@@ -104,7 +90,7 @@ public class ClaimCommand implements CommandExecutor {
                 }
             });
         }, error -> {
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtils.runSync(plugin, () -> {
                 if (player.isOnline()) {
                     player.sendMessage(ChatColor.RED + "❌ Failed to retrieve your Discord data.");
                 }

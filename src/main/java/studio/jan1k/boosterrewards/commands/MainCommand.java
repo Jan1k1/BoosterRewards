@@ -37,23 +37,23 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 plugin.reloadConfig();
                 plugin.getConfigManager().loadFullConfigs();
                 plugin.getItemRewardHandler().refreshCache();
+                plugin.initializeDiscordBot();
                 sender.sendMessage(ChatColor.GREEN + "BoosterRewards configuration reloaded!");
                 break;
             case "link":
-                // Forward arguments (remove 'link')
                 String[] linkArgs = Arrays.copyOfRange(args, 1, args.length);
                 new LinkCommand(plugin).onCommand(sender, command, "link", linkArgs);
                 break;
             case "unlink":
                 if (args.length > 1) {
-                    // Admin force unlink: /br unlink <player>
                     if (!sender.hasPermission("boosterrewards.admin")) {
                         sender.sendMessage(ChatColor.RED + "No permission.");
                         return true;
                     }
                     String targetName = args[1];
+                    @SuppressWarnings("deprecation")
                     org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(targetName);
-                    if (target == null) { // Deprecated but standard for offline players by name
+                    if (target == null || target.getUniqueId() == null) {
                         sender.sendMessage(ChatColor.RED + "Player not found.");
                         return true;
                     }
@@ -74,7 +74,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                                 .sendMessage(ChatColor.RED + "Your account has been unlinked by an administrator.");
                     }
                 } else {
-                    // Self unlink
                     new UnlinkCommand(plugin).onCommand(sender, command, "unlink", new String[0]);
                 }
                 break;
@@ -132,6 +131,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleResetClaim(CommandSender sender, String[] args) {
+        @SuppressWarnings("deprecation")
         org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(args[1]);
         java.util.UUID uuid = target.getUniqueId();
         String tier = args.length > 2 ? args[2] : null;
@@ -147,6 +147,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleStats(CommandSender sender, String[] args) {
+        @SuppressWarnings("deprecation")
         org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(args[1]);
         java.util.UUID uuid = target.getUniqueId();
         String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
@@ -188,7 +189,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 2 && ("stats".equalsIgnoreCase(args[0]) || "resetclaim".equalsIgnoreCase(args[0])
                 || "unlink".equalsIgnoreCase(args[0]))) {
-            return null; // Return null to show player lists
+            return null;
         }
         return Collections.emptyList();
     }

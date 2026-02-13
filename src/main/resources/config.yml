@@ -212,10 +212,6 @@ features:
   # false = Player must run a command to claim their rewards
   auto-claim: true
   
-  # ANNOUNCE BOOSTS
-  # Post a message when a linked player boosts.
-  # Set to false for silent operation.
-  announce-boosts: false
 
 # =============================================================================
 # LINK PANEL (Optional Discord Embed)

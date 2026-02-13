@@ -18,21 +18,17 @@ public class SetBoosterRewardCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "Only players can use this command.");
+            return true;
+        }
+
         if (!sender.hasPermission("boosterrewards.admin")) {
             sender.sendMessage(ChatColor.RED + "No permission.");
             return true;
         }
 
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            if (args.length == 0) {
-                new AdminGUI(plugin).open(player);
-            } else {
-                player.sendMessage(ChatColor.RED + "Usage: /setboosterreward");
-            }
-        } else {
-            sender.sendMessage(ChatColor.RED + "Console cannot use the reward editor GUI.");
-        }
+        new AdminGUI(plugin).open((Player) sender);
         return true;
     }
 }

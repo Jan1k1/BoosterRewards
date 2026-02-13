@@ -1,12 +1,12 @@
 package studio.jan1k.boosterrewards.commands;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import studio.jan1k.boosterrewards.BoosterReward;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 
 public class UnlinkCommand implements CommandExecutor {
 
@@ -25,7 +25,7 @@ public class UnlinkCommand implements CommandExecutor {
 
         Player player = (Player) sender;
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtils.runAsync(plugin, () -> {
             if (plugin.getPlayerData(player.getUniqueId()) == null) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         plugin.getConfigManager().getInGameMessage("logout.not-linked")));
@@ -42,4 +42,3 @@ public class UnlinkCommand implements CommandExecutor {
         return true;
     }
 }
-
