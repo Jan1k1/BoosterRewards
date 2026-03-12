@@ -54,8 +54,8 @@ public class BoosterReward extends JavaPlugin {
         saveDefaultConfig();
         configManager.loadFullConfigs();
 
-        initializeDiscordBot();
         loadCoreModules();
+        initializeDiscordBot();
     }
 
     public void initializeDiscordBot() {
