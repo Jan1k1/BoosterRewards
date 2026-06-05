@@ -34,10 +34,7 @@ public class RewardManager {
 
                 List<String> commands = plugin.getConfig().getStringList("rewards." + tier + ".on-boost");
                 String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
-                Player cachedPlayer = Bukkit.getPlayer(uuid);
-                String playerName = cachedPlayer != null ? cachedPlayer.getName() : uuid.toString();
-
-                plugin.getItemRewardHandler().queueItemRewards(uuid, playerName, tier);
+                plugin.getItemRewardHandler().queueItemRewards(uuid, uuid.toString(), tier);
 
                 handedOffToSync = true;
                 SchedulerUtils.runSync(plugin, () -> {
