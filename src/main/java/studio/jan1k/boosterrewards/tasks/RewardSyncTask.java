@@ -6,7 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.core.PlayerData;
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class RewardSyncTask implements Runnable {
@@ -58,19 +61,25 @@ public class RewardSyncTask implements Runnable {
     }
 
     private void checkRewards(Player player, boolean isBooster, int boostCount) {
-        plugin.getDatabaseManager().setBoosterStatus(player.getUniqueId(), isBooster, boostCount);
-
+        List<String> tiersToGive = new ArrayList<>();
         if (isBooster) {
             org.bukkit.configuration.ConfigurationSection tiers = plugin.getConfig().getConfigurationSection("rewards");
             if (tiers != null) {
                 for (String tier : tiers.getKeys(false)) {
                     if (plugin.getConfig().getBoolean("rewards." + tier + ".enabled", false)) {
                         if (tier.equals("booster") || (tier.equals("booster_2") && boostCount >= 2)) {
-                            plugin.getRewardManager().giveReward(player.getUniqueId(), tier);
+                            tiersToGive.add(tier);
                         }
                     }
                 }
             }
         }
+
+        SchedulerUtils.runAsync(plugin, () -> {
+            plugin.getDatabaseManager().setBoosterStatus(player.getUniqueId(), isBooster, boostCount);
+            for (String tier : tiersToGive) {
+                plugin.getRewardManager().giveReward(player.getUniqueId(), tier);
+            }
+        });
     }
 }

@@ -29,7 +29,7 @@ public class LinkCommand implements CommandExecutor {
         }
 
         Player player = (Player) sender;
-        String mode = plugin.getConfig().getString("linking.mode", "MINECRAFT_TO_DISCORD");
+        String mode = plugin.getConfig().getString("linking.mode", "DISCORD_TO_MINECRAFT");
 
         if (mode.equalsIgnoreCase("MINECRAFT_TO_DISCORD")) {
             SchedulerUtils.runAsync(plugin, () -> {

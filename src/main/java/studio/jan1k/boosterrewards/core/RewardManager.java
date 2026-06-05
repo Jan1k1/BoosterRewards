@@ -6,46 +6,78 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import studio.jan1k.boosterrewards.BoosterReward;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 
 public class RewardManager {
 
     private final BoosterReward plugin;
+    private final Set<String> deliveriesInProgress = ConcurrentHashMap.newKeySet();
 
     public RewardManager(BoosterReward plugin) {
         this.plugin = plugin;
     }
 
     public void giveReward(UUID uuid, String tier) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            boolean alreadyClaimed = plugin.getDatabaseManager().hasAlreadyClaimed(uuid, tier);
+        String deliveryKey = uuid + ":" + tier;
+        if (!deliveriesInProgress.add(deliveryKey))
+            return;
 
-            List<String> commands = plugin.getConfig().getStringList("rewards." + tier + ".on-boost");
-            String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
-
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                Player player = Bukkit.getPlayer(uuid);
-                if (player == null)
+        SchedulerUtils.runAsync(plugin, () -> {
+            boolean handedOffToSync = false;
+            try {
+                if (plugin.getDatabaseManager().hasAlreadyClaimed(uuid, tier))
                     return;
 
-                if (!alreadyClaimed) {
-                    for (String cmd : commands) {
-                        executeCommand(player, cmd, discordId);
-                    }
-                    plugin.getDatabaseManager().addClaimRecord(uuid, tier);
-                }
+                List<String> commands = plugin.getConfig().getStringList("rewards." + tier + ".on-boost");
+                String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
+                Player cachedPlayer = Bukkit.getPlayer(uuid);
+                String playerName = cachedPlayer != null ? cachedPlayer.getName() : uuid.toString();
 
-                plugin.getItemRewardHandler().queueItemRewards(player, tier);
-            });
+                plugin.getItemRewardHandler().queueItemRewards(uuid, playerName, tier);
+
+                handedOffToSync = true;
+                SchedulerUtils.runSync(plugin, () -> {
+                    Player player = Bukkit.getPlayer(uuid);
+                    if (player == null) {
+                        deliveriesInProgress.remove(deliveryKey);
+                        return;
+                    }
+
+                    boolean delivered = true;
+                    for (String cmd : commands) {
+                        delivered &= executeCommand(player, cmd, discordId);
+                    }
+
+                    if (delivered) {
+                        SchedulerUtils.runAsync(plugin, () -> {
+                            try {
+                                plugin.getDatabaseManager().addClaimRecord(uuid, tier);
+                            } finally {
+                                deliveriesInProgress.remove(deliveryKey);
+                            }
+                        });
+                    } else {
+                        deliveriesInProgress.remove(deliveryKey);
+                    }
+                });
+            } finally {
+                if (!handedOffToSync) {
+                    deliveriesInProgress.remove(deliveryKey);
+                }
+            }
         });
     }
 
     public void revokeReward(UUID uuid, String tier) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtils.runAsync(plugin, () -> {
             List<String> commands = plugin.getConfig().getStringList("rewards." + tier + ".on-stop");
             String discordId = plugin.getDatabaseManager().getDiscordId(uuid);
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtils.runSync(plugin, () -> {
                 Player player = Bukkit.getPlayer(uuid);
                 if (player == null)
                     return;
@@ -57,16 +89,15 @@ public class RewardManager {
         });
     }
 
-    private void executeCommand(Player player, String command, String discordId) {
+    private boolean executeCommand(Player player, String command, String discordId) {
         String processed = replacePlaceholders(command, player, discordId);
 
         if (processed.startsWith("player: ")) {
-            player.performCommand(processed.substring(8));
+            return player.performCommand(processed.substring(8));
         } else if (processed.startsWith("console: ")) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processed.substring(9));
+            return Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processed.substring(9));
         } else {
-            // Default to console
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processed);
+            return Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processed);
         }
     }
 

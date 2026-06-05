@@ -7,8 +7,8 @@
 #   |____/ \___/ \___/|___/ \__\___|_|  |_|  \_\___| \_/\_/ \__,_|_|  \__,_|___/
 #                         MAIN CONFIGURATION FILE
 # =============================================================================
-# Need help? Create a ticket at: https://discord.gg/38Ebj42e
-# Documentation: https://jan1k1.github.io/BoosterRewards
+# Project: https://github.com/Jan1k1/BoosterRewards
+# Site: https://jan1k.org
 #Config Version (Do not change)
 config-version: 1
 # =============================================================================
@@ -38,8 +38,8 @@ config-version: 1
 #   - MYSQL    (Remote database, requires server details)
 #   - MARIADB  (Same as MySQL, just a different database engine)
 #
-# For small servers (under 100 players), H2 is perfectly fine.
-# For large networks, use MySQL/MariaDB for better performance.
+# For small servers, H2 is fine.
+# Use MySQL or MariaDB if you already run a shared database.
 # =============================================================================
 database:
   # Database type: H2, MYSQL, or MARIADB

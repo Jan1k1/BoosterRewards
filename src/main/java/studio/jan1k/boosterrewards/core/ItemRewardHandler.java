@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import studio.jan1k.boosterrewards.BoosterReward;
 import studio.jan1k.boosterrewards.utils.Logs;
-import studio.jan1k.boosterrewards.utils.SchedulerUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
@@ -69,35 +68,34 @@ public class ItemRewardHandler {
     }
 
     public void queueItemRewards(Player player, String tier) {
+        queueItemRewards(player.getUniqueId(), player.getName(), tier);
+    }
+
+    public void queueItemRewards(UUID uuid, String playerName, String tier) {
         List<ItemStack> items = getCachedRewards(tier);
         if (items.isEmpty())
             return;
 
-        UUID uuid = player.getUniqueId();
-        String playerName = player.getName();
+        for (int i = 0; i < items.size(); i++) {
+            ItemStack item = items.get(i);
+            try {
+                Map<String, Object> itemMap = ItemSerializer.serialize(item);
+                String json = mapper.writeValueAsString(itemMap);
 
-        SchedulerUtils.runAsync(plugin, () -> {
-            for (int i = 0; i < items.size(); i++) {
-                ItemStack item = items.get(i);
-                try {
-                    Map<String, Object> itemMap = ItemSerializer.serialize(item);
-                    String json = mapper.writeValueAsString(itemMap);
+                String hashInput = tier + ":" + i + ":" + json;
+                String itemHash = java.util.Base64.getEncoder().encodeToString(
+                        java.security.MessageDigest.getInstance("MD5").digest(hashInput.getBytes()));
 
-                    String hashInput = tier + ":" + i + ":" + json;
-                    String itemHash = java.util.Base64.getEncoder().encodeToString(
-                            java.security.MessageDigest.getInstance("MD5").digest(hashInput.getBytes()));
-
-                    if (plugin.getDatabaseManager().isItemAlreadyClaimed(uuid, itemHash) ||
-                            plugin.getDatabaseManager().hasPendingItem(uuid, itemHash)) {
-                        continue;
-                    }
-
-                    plugin.getDatabaseManager().addPendingReward(uuid, json, tier, itemHash);
-                } catch (Exception e) {
-                    Logs.error("Failed to queue reward item for " + playerName + ": " + e.getMessage());
+                if (plugin.getDatabaseManager().isItemAlreadyClaimed(uuid, itemHash) ||
+                        plugin.getDatabaseManager().hasPendingItem(uuid, itemHash)) {
+                    continue;
                 }
+
+                plugin.getDatabaseManager().addPendingReward(uuid, json, tier, itemHash);
+            } catch (Exception e) {
+                Logs.error("Failed to queue reward item for " + playerName + ": " + e.getMessage());
             }
-        });
+        }
     }
 
     public void giveItemRewards(Player player, String tier) {

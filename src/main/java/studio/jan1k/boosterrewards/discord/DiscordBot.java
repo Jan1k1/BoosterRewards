@@ -237,7 +237,7 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     private void handleLink(SlashCommandInteractionEvent event) {
-        String mode = plugin.getConfig().getString("linking.mode", "MINECRAFT_TO_DISCORD");
+        String mode = plugin.getConfig().getString("linking.mode", "DISCORD_TO_MINECRAFT");
         String discordId = event.getUser().getId();
         String username = event.getUser().getName();
 

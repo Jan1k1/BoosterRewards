@@ -1,6 +1,6 @@
 # BoosterRewards | Discord Booster Rewards
 
-Reward your Discord server boosters with in-game perks. Link Minecraft accounts to Discord, automatically sync boost status, and execute custom commands when players boost or stop boosting.
+Reward Discord server boosters with in-game perks. Link Minecraft accounts to Discord, sync boost status, and run reward commands when players boost or stop boosting.
 
 ## What It Does
 
@@ -8,7 +8,7 @@ Reward your Discord server boosters with in-game perks. Link Minecraft accounts 
 - **Automatic Sync**: Checks boost status every 5 minutes (configurable)
 - **Custom Rewards**: Run any command when a player boosts (permissions, items, currency)
 - **Revocation**: Automatically remove rewards when boost expires
-- **Cache System**: In-memory caching to prevent database overload on large servers
+- **Cache System**: In-memory player link cache
 
 ## Installation
 
@@ -67,14 +67,6 @@ Set `linking.mode` in `config.yml`:
 - `/unlink` - Remove account link
 - `/status` - Check your boost status and rewards
 
-## Performance
-
-Designed for 1000+ player servers:
-- All database operations run asynchronously
-- Player data cached in memory
-- Zero main-thread blocking
-- HikariCP connection pooling
-
 ## Requirements
 
 - Minecraft 1.21.4+ (Paper/Spigot)
@@ -84,7 +76,8 @@ Designed for 1000+ player servers:
 ## Support
 
 - Issues: [GitHub Issues](https://github.com/jan1k1/BoosterRewards/issues)
-- Discord: [Join Support Server](https://discord.gg/38Ebj42e)
+- Site: [jan1k.org](https://jan1k.org)
+- GitHub: [Jan1k1](https://github.com/Jan1k1)
 
 ## License
 

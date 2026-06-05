@@ -82,7 +82,7 @@ discord:
 embeds:
   default:
     color: "#54A5FF"
-    footer-text: "boosterrewards • jan1k.studio"
+    footer-text: "boosterrewards • jan1k.org"
     footer-icon: ""
     thumbnail: ""
     

@@ -186,11 +186,11 @@ public class BoosterReward extends JavaPlugin {
         Logs.bannerAccent(blue + "  ██║  ██║███████╗╚███╔███╔╝██║  ██║██║  ██║██████╔╝███████║");
         Logs.bannerAccent(blue + "  ╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝" + reset);
         Logs.raw(" ");
-        Logs.raw("  §fBOOSTER   Premium Discord Boosting System");
-        Logs.raw("  §f© 2026 jan1k.studio - All Rights Reserved");
+        Logs.raw("  §fBOOSTER   Discord Boost Rewards");
+        Logs.raw("  §fjan1k.org");
         Logs.raw(" ");
-        Logs.raw("  §e⚠ Found a bug or have a suggestion?");
-        Logs.raw("  §b→ Join our Discord: §fhttps://discord.gg/38Ebj42e");
+        Logs.raw("  §eIssues and updates");
+        Logs.raw("  §b→ https://github.com/Jan1k1/BoosterRewards");
         Logs.raw(" ");
     }
 
@@ -234,7 +234,6 @@ public class BoosterReward extends JavaPlugin {
                                             if (tier.equals("booster")
                                                     || (tier.equals("booster_2") && boostCount >= 2)) {
                                                 rewardManager.giveReward(uuid, tier);
-                                                databaseManager.addClaimRecord(uuid, tier);
                                             }
                                         }
                                     }
